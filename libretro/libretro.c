@@ -80,6 +80,8 @@
 #include "sms_ntsc.h"
 #include "osd.h"
 
+#include "../libRetroReversing/include/libRR_c.h"
+
 #define STATIC_ASSERT(name, test) typedef struct { int assert_[(test)?1:-1]; } assert_ ## name ## _
 #define M68K_MAX_CYCLES 1107
 #define Z80_MAX_CYCLES 345
@@ -147,10 +149,12 @@ static char g_rom_dir[256];
 static char g_rom_name[256];
 static char *save_dir;
 
+char retro_save_directory[4096];
+
 static retro_log_printf_t log_cb;
-static retro_video_refresh_t video_cb;
+ retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
-static retro_input_state_t input_state_cb;
+static retro_input_state_t original_input_state_cb;
 static retro_environment_t environ_cb;
 static retro_audio_sample_batch_t audio_cb;
 
@@ -373,6 +377,7 @@ static void osd_input_update_internal_bitmasks(void)
 {
    int i, player = 0;
    unsigned int temp;
+   retro_input_state_t input_state_cb = libRR_handle_input(original_input_state_cb);
    int16_t ret = input_state_cb(player, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
 
    for (i = 0; i < MAX_INPUTS; i++)
@@ -616,6 +621,7 @@ static void osd_input_update_internal(void)
 {
    int i, player = 0;
    unsigned int temp;
+   retro_input_state_t input_state_cb = libRR_handle_input(original_input_state_cb);
 
    for (i = 0; i < MAX_INPUTS; i++)
    {
@@ -2523,6 +2529,10 @@ void retro_set_environment(retro_environment_t cb)
 
    libretro_set_core_options(environ_cb);
 
+   //libRR start
+   libRR_setInputDescriptor(desc, 12);
+   //libRR end
+
    cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
    cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, (void*)desc);
 
@@ -2537,7 +2547,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_audio_sample(retro_audio_sample_t cb) { (void)cb; }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
-void retro_set_input_state(retro_input_state_t cb) { input_state_cb = cb; }
+void retro_set_input_state(retro_input_state_t cb) { original_input_state_cb = cb; }
 
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -2821,6 +2831,8 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
 	apply_cheats();
 }
 
+extern enum retro_pixel_format libRR_core_pixel_format;
+
 bool retro_load_game(const struct retro_game_info *info)
 {
    int i;
@@ -2837,6 +2849,7 @@ bool retro_load_game(const struct retro_game_info *info)
 #ifdef FRONTEND_SUPPORTS_RGB565
    {
       unsigned rgb565 = RETRO_PIXEL_FORMAT_RGB565;
+      libRR_core_pixel_format = RETRO_PIXEL_FORMAT_RGB565;
       if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
          if (log_cb)
             log_cb(RETRO_LOG_INFO, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
@@ -2865,6 +2878,9 @@ bool retro_load_game(const struct retro_game_info *info)
          log_cb(RETRO_LOG_INFO, "[genplus]: Defaulting save directory to %s.\n", g_rom_dir);
       save_dir = g_rom_dir;
    }
+   // libRR_ start
+   snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", save_dir);
+   // libRR_ end
 
    snprintf(GG_ROM, sizeof(GG_ROM), "%s%cggenie.bin", dir, slash);
    snprintf(AR_ROM, sizeof(AR_ROM), "%s%careplay.bin", dir, slash);
@@ -2945,6 +2961,10 @@ bool retro_load_game(const struct retro_game_info *info)
 
    init_frameskip();
 
+   // libRR start
+    libRR_handle_load_game(info, environ_cb);
+    // libRR end
+
    return true;
 }
 
@@ -2958,6 +2978,8 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 
 void retro_unload_game(void) 
 {
+   libRR_handle_emulator_close();
+
    if (system_hw == SYSTEM_MCD)
       bram_save();
 
@@ -3084,6 +3106,14 @@ void retro_run(void)
    int do_skip = 0;
    bool updated = false;
    is_running = true;
+
+// libRR start
+   bool should_continue = libRR_run_frame();
+   if (!should_continue)
+   {
+      return;
+   }
+// libRR end
 
 #ifdef HAVE_OVERCLOCK
   /* update overclock delay */
@@ -3212,9 +3242,9 @@ void retro_run(void)
    }
 
    if (!do_skip)
-     video_cb(bitmap.data, vwidth, vheight, 720 * 2);
+     libRR_video_cb(bitmap.data, vwidth, vheight, 720 * 2);
    else
-     video_cb(NULL, vwidth, vheight, 720 * 2);
+     libRR_video_cb(NULL, vwidth, vheight, 720 * 2);
 
    audio_cb(soundbuffer, audio_update(soundbuffer));
 }

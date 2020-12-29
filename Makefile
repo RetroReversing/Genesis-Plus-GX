@@ -148,7 +148,7 @@ ifeq ($(arch),ppc)
 
    OSXVER = `sw_vers -productVersion | cut -d. -f 2`
    OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-   fpic += -mmacosx-version-min=10.1
+   fpic += -mmacosx-version-min=10.15
    ifndef ($(NOUNIVERSAL))
       CFLAGS  += $(ARCHFLAGS)
       LDFLAGS += $(ARCHFLAGS)
@@ -641,6 +641,8 @@ ifeq ($(SHARED_LIBVORBIS),)
 endif
 
 include $(CORE_DIR)/libretro/Makefile.common
+libRetroReversingConsole = GenesisPlusGX
+include ./libRetroReversing/Makefile.retroreversing
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
