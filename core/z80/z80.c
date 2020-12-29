@@ -2959,23 +2959,23 @@ OP(op,0d) { C = DEC(C);   libRR_log_instruction(PC-1, "dec c", 0x0d, 1);        
 OP(op,0e) { C = ARG();    libRR_log_instruction_1int(PC-1, "ld c, ", 0x0e, 2, C);                      } /* LD   C,n         */
 OP(op,0f) { RRCA;         libRR_log_instruction(PC-1, "rrca", 0x0f, 1);                                } /* RRCA             */
 
-OP(op,10) { B--; JR_COND( B, 0x10 );                                                                       } /* DJNZ o           */
-OP(op,11) { DE = ARG16();                                                                                  } /* LD   DE,w        */
-OP(op,12) { WM( DE, A ); WZ_L = (DE + 1) & 0xFF;  WZ_H = A;                                                } /* LD   (DE),A      */
-OP(op,13) { DE++;                                                                                          } /* INC  DE          */
-OP(op,14) { D = INC(D);                                                                                    } /* INC  D           */
-OP(op,15) { D = DEC(D);                                                                                    } /* DEC  D           */
-OP(op,16) { D = ARG();                                                                                     } /* LD   D,n         */
-OP(op,17) { RLA;                                                                                           } /* RLA              */
+OP(op,10) { B--; JR_COND( B, 0x10 );  libRR_log_instruction(PC-1, "djnz o", 0x10, 2);                      } /* DJNZ o           */
+OP(op,11) { DE = ARG16(); libRR_log_instruction_1int(PC-1, "ld de, %int%", 0x11, 3, DE);               } /* LD   DE,w        */
+OP(op,12) { WM( DE, A ); WZ_L = (DE + 1) & 0xFF;  WZ_H = A; libRR_log_instruction(PC-1, "ld [de],a", 0x12, 1);  } /* LD   (DE),A      */
+OP(op,13) { DE++;         libRR_log_instruction(PC-1, "inc de", 0x13, 1);                                  } /* INC  DE          */
+OP(op,14) { D = INC(D);   libRR_log_instruction(PC-1, "inc d", 0x14, 1);                                   } /* INC  D           */
+OP(op,15) { D = DEC(D);   libRR_log_instruction(PC-1, "dec d", 0x15, 1);                                   } /* DEC  D           */
+OP(op,16) { D = ARG();    libRR_log_instruction_1int(PC-1, "ld d, ", 0x16, 2, D);                          } /* LD   D,n         */
+OP(op,17) { RLA;          libRR_log_instruction(PC-1, "rla", 0x17, 1);                                     } /* RLA              */
 
-OP(op,18) { JR();                                                                                          } /* JR   o           */
-OP(op,19) { ADD16(hl, de);                                                                                 } /* ADD  HL,DE       */
-OP(op,1a) { A = RM( DE ); WZ=DE+1;                                                                         } /* LD   A,(DE)      */
-OP(op,1b) { DE--;                                                                                          } /* DEC  DE          */
-OP(op,1c) { E = INC(E);                                                                                    } /* INC  E           */
-OP(op,1d) { E = DEC(E);                                                                                    } /* DEC  E           */
-OP(op,1e) { E = ARG();                                                                                     } /* LD   E,n         */
-OP(op,1f) { RRA;                                                                                           } /* RRA              */
+OP(op,18) { JR();         libRR_log_instruction_1int(PC-1, "jr %int% todo", 0x18, 2, 0/*TODO handle jump*/);                   } /* JR   o           */
+OP(op,19) { ADD16(hl, de); libRR_log_instruction(PC-1, "add hl, de", 0x19, 1);                             } /* ADD  HL,DE       */
+OP(op,1a) { A = RM( DE ); WZ=DE+1; libRR_log_instruction(PC-1, "ld a, [de]", 0x1A, 1);                     } /* LD   A,(DE)      */
+OP(op,1b) { DE--;         libRR_log_instruction(PC-1, "dec de", 0x1b, 1);                                  } /* DEC  DE          */
+OP(op,1c) { E = INC(E);   libRR_log_instruction(PC-1, "inc e", 0x1c, 1);                                   } /* INC  E           */
+OP(op,1d) { E = DEC(E);   libRR_log_instruction(PC-1, "dec e", 0x1d, 1);                                   } /* DEC  E           */
+OP(op,1e) { E = ARG();    libRR_log_instruction_1int(PC-1, "ld e, ", 0x1e, 2, E);                          } /* LD   E,n         */
+OP(op,1f) { RRA;          libRR_log_instruction(PC-1, "rra", 0x1f, 1);                                     } /* RRA              */
 
 OP(op,20) { JR_COND( !(F & ZF), 0x20 );                                                                    } /* JR   NZ,o        */
 OP(op,21) { HL = ARG16();                                                                                  } /* LD   HL,w        */
