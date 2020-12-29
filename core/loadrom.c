@@ -519,6 +519,8 @@ int load_bios(int system)
   }
 }
 
+extern int libRR_emulated_hardware;
+
 /***************************************************************************
  * load_rom
  *
@@ -640,6 +642,10 @@ int load_rom(char *filename)
         }
       }
     }
+
+    //libRR start
+    libRR_emulated_hardware = system_hw;
+    //libRR end
 
     /* auto-detect 512 byte extra header */
     if (memcmp((char *)(cart.rom + 0x100), "SEGA", 4) && ((size / 512) & 1) && !(size % 512))

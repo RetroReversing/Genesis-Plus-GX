@@ -2302,6 +2302,7 @@ void ROMCheatUpdate(void)
 
 static void set_memory_maps()
 {
+   printf("Set memory maps is called\n");
    if (system_hw == SYSTEM_MCD)
    {
       const size_t SCD_BIT = 1ULL << 31ULL;
@@ -2317,7 +2318,38 @@ static void set_memory_maps()
       mmaps.descriptors = descs;
       mmaps.num_descriptors = sizeof(descs) / sizeof(descs[0]);
       environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
+      return;
    }
+
+   // libRR start setup memory maps for other consoles
+
+   if (system_hw == SYSTEM_GG)
+   {
+      //const size_t SCD_BIT = 1ULL << 31ULL;
+      const uint64_t mem = RETRO_MEMDESC_SYSTEM_RAM;
+      struct retro_memory_map mmaps;
+      struct retro_memory_descriptor descs[] = {
+          // flags | pointer | offset | start | select | disconnect | length | name
+         { 0,        cart.rom,     0,   0x00,  0,      0,           cart.romsize, "ROM" },
+         { 0,        cart.rom,     0,   0x00,  0,      0,           0x03ff, "Unpaged" },
+         // TODO: should change the following to use slot.rom instead with the correct page
+         { 0,        (cart.rom+0x0400),     0x0400,   0x0400,  0,      0,           0x3bff, "Mapper Slot 0" },
+         { 0,        (cart.rom+0x4000),     0x4000,   0x4000,  0,      0,           0x3fff, "Mapper Slot 1" },
+         { 0,        cart.rom,     0x8000,   0x8000,  0,      0,           0x3fff, "Mapper Slot 2" },
+         { 0,        work_ram,     0,   0xc000,  0,      0,           0x1fff, "SYSTEM RAM" },
+         { 0,        work_ram,     0,   0xe000,  0,      0,           0x1fff, "SYSTEM RAM Mirror" },
+      };
+
+      mmaps.descriptors = descs;
+      mmaps.num_descriptors = sizeof(descs) / sizeof(descs[0]);
+      libRR_set_retro_memmap(descs, mmaps.num_descriptors);
+      environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
+      return;
+   }
+
+   // libRR end
+
+
 }
 
 /************************************

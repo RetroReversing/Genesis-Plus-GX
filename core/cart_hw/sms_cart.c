@@ -71,7 +71,7 @@ typedef struct
 
 typedef struct
 {
-  uint8 fcr[4];
+  uint8 fcr[4]; // frame control registers
   uint8 mapper;
   uint16 pages;
 } romhw_t;
@@ -367,9 +367,9 @@ static romhw_t bios_rom;
 static struct
 {
   uint8 *rom;
-  uint8 *fcr;
-  uint8 mapper;
-  uint16 pages;
+  uint8 *fcr; // frame control registers (array of 4 bytes)
+  uint8 mapper; // the mapper ID used in the cart
+  uint16 pages; // number of pages
 } slot;
 
 /* Function prototypes */
