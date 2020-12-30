@@ -127,6 +127,8 @@
 #include "shared.h"
 #include "z80.h"
 
+#include "../../libRetroReversing/include/libRR_c.h"
+
 /* execute main opcodes inside a big switch statement */
 #define BIG_SWITCH 1
 
@@ -201,6 +203,10 @@
 #define IFF1 Z80.iff1
 #define IFF2 Z80.iff2
 #define HALT Z80.halt
+
+// libRR start
+uint32_t TEMP = 0;
+// libRR end
 
 #ifdef Z80_OVERCLOCK_SHIFT
 #define USE_CYCLES(A) Z80.cycles += ((A) * z80_cycle_ratio) >> Z80_OVERCLOCK_SHIFT
@@ -512,6 +518,7 @@ INLINE void BURNODD(int cycles, int opcodes, int cyclesum)
 #define EXEC(prefix,opcode)      \
 {                                \
   unsigned op = opcode;          \
+  libRR_log_instruction_1int(PC-1, "exec inst %int%", 0xd6, 2, op ); \
   CC(prefix,op);                 \
   (*Z80##prefix[op])();          \
 }
@@ -2995,22 +3002,22 @@ OP(op,2d) { L = DEC(L);   libRR_log_instruction(PC-1, "dec l", 0x2d, 1);        
 OP(op,2e) { L = ARG();    libRR_log_instruction_1int(PC-1, "ld l, ", 0x2e, 2, L);                          } /* LD   L,n         */
 OP(op,2f) { A ^= 0xff; F = (F&(SF|ZF|PF|CF))|HF|NF|(A&(YF|XF)); libRR_log_instruction(PC-1, "cpl", 0x2f, 1); } /* CPL              */
 
-OP(op,30) { JR_COND( !(F & CF), 0x30 );                                                                    } /* JR   NC,o        */
-OP(op,31) { SP = ARG16();                                                                                  } /* LD   SP,w        */
-OP(op,32) { EA = ARG16(); WM( EA, A ); WZ_L=(EA+1)&0xFF;WZ_H=A;                                            } /* LD   (w),A       */
-OP(op,33) { SP++;                                                                                          } /* INC  SP          */
-OP(op,34) { WM( HL, INC(RM(HL)) );                                                                         } /* INC  (HL)        */
-OP(op,35) { WM( HL, DEC(RM(HL)) );                                                                         } /* DEC  (HL)        */
-OP(op,36) { WM( HL, ARG() );                                                                               } /* LD   (HL),n      */
+OP(op,30) { JR_COND( !(F & CF), 0x30 ); libRR_log_instruction_1int(PC-1, "jr bc, %int%", 0x30, 2, 0 /*TODO*/ ); } /* JR   NC,o        */
+OP(op,31) { SP = ARG16(); libRR_log_instruction_1int(PC-1, "ld sp, %int%", 0x31, 3, SP);                        } /* LD   SP,w        */
+OP(op,32) { EA = ARG16(); WM( EA, A ); WZ_L=(EA+1)&0xFF;WZ_H=A; libRR_log_instruction_1int(PC-1, "ld [%int%], a", 0x32, 3, EA); } /* LD   (w),A       */
+OP(op,33) { SP++;          libRR_log_instruction(PC-1, "inc sp", 0x33, 1);                                 } /* INC  SP          */
+OP(op,34) { WM( HL, INC(RM(HL)) ); libRR_log_instruction(PC-1, "inc [hl]", 0x34, 1);                       } /* INC  (HL)        */
+OP(op,35) { WM( HL, DEC(RM(HL)) );  libRR_log_instruction(PC-1, "dec [hl]", 0x35, 1);                      } /* DEC  (HL)        */
+OP(op,36) { TEMP=ARG(); WM( HL, TEMP );    libRR_log_instruction_1int(PC-1, "ld [hl], %int%", 0x36, 2, TEMP);             } /* LD   (HL),n      */
 OP(op,37) { F = (F & (SF|ZF|YF|XF|PF)) | CF | (A & (YF|XF)); libRR_log_instruction(PC-1, "scf", 0x37, 1); } /* SCF              */
 
-OP(op,38) { JR_COND( F & CF, 0x38 );                                                                       } /* JR   C,o         */
-OP(op,39) { ADD16(hl, sp);                                                                                 } /* ADD  HL,SP       */
-OP(op,3a) { EA = ARG16(); A = RM( EA ); WZ = EA+1;                                                         } /* LD   A,(w)       */
-OP(op,3b) { SP--;                                                                                          } /* DEC  SP          */
-OP(op,3c) { A = INC(A);                                                                                    } /* INC  A           */
-OP(op,3d) { A = DEC(A);                                                                                    } /* DEC  A           */
-OP(op,3e) { A = ARG();                                                                                     } /* LD   A,n         */
+OP(op,38) { JR_COND( F & CF, 0x38 ); libRR_log_instruction_1int(PC-1, "jr c, %int%", 0x38, 2, 0 /*TODO*/ );  } /* JR   C,o         */
+OP(op,39) { ADD16(hl, sp);  libRR_log_instruction(PC-1, "add hl,sp", 0x39, 1);                             } /* ADD  HL,SP       */
+OP(op,3a) { EA = ARG16(); A = RM( EA ); WZ = EA+1; libRR_log_instruction_1int(PC-1, "ld a, [%int%]", 0x3a, 3, EA); } /* LD   A,(w)       */
+OP(op,3b) { SP--;        libRR_log_instruction(PC-1, "dec sp", 0x3b, 1);                                   } /* DEC  SP          */
+OP(op,3c) { A = INC(A);  libRR_log_instruction(PC-1, "inc a", 0x3c, 1);                                    } /* INC  A           */
+OP(op,3d) { A = DEC(A);  libRR_log_instruction(PC-1, "dec a", 0x3d, 1);                                    } /* DEC  A           */
+OP(op,3e) { A = ARG();   libRR_log_instruction_1int(PC-1, "ld a, %int%", 0x3e, 2, A);                           } /* LD   A,n         */
 OP(op,3f) { F = ((F&(SF|ZF|YF|XF|PF|CF))|((F&CF)<<4)|(A&(YF|XF)))^CF; libRR_log_instruction(PC-1, "ccf", 0x3f, 1); } /* CCF              */
 
 OP(op,40) {           libRR_log_instruction(PC-1, "ld b, b", 0x40, 1);                                     } /* LD   B,B         */
@@ -3029,7 +3036,7 @@ OP(op,4b) { C = E;    libRR_log_instruction(PC-1, "ld c, e", 0x4b, 1);          
 OP(op,4c) { C = H;    libRR_log_instruction(PC-1, "ld c, h", 0x4c, 1);                                     } /* LD   C,H         */
 OP(op,4d) { C = L;    libRR_log_instruction(PC-1, "ld c, l", 0x4d, 1);                                     } /* LD   C,L         */
 OP(op,4e) { C = RM(HL); libRR_log_instruction(PC-1, "ld c, [hl]", 0x4e, 1);                                } /* LD   C,(HL)      */
-OP(op,4f) { C = A;    libRR_log_instruction(PC-1, "ld c, a", 0x4a, 1);                                     } /* LD   C,A         */
+OP(op,4f) { C = A;    libRR_log_instruction(PC-1, "ld c, a", 0x4f, 1);                                     } /* LD   C,A         */
 
 OP(op,50) { D = B;    libRR_log_instruction(PC-1, "ld d, b", 0x50, 1);                                     } /* LD   D,B         */
 OP(op,51) { D = C;    libRR_log_instruction(PC-1, "ld d, c", 0x51, 1);                                     } /* LD   D,C         */
@@ -3076,16 +3083,16 @@ OP(op,75) { WM( HL, L ); libRR_log_instruction(PC-1, "ld [hl], l", 0x75, 1);    
 OP(op,76) { ENTER_HALT;  libRR_log_instruction(PC-1, "halt", 0x76, 1);                                     } /* HALT             */
 OP(op,77) { WM( HL, A ); libRR_log_instruction(PC-1, "ld [hl], a", 0x77, 1);                               } /* LD   (HL),A      */
 
-OP(op,78) { A = B;       libRR_log_instruction(PC-1, "ld a, b", 0x78, 1);                               } /* LD   A,B         */
+OP(op,78) { A = B;       libRR_log_instruction(PC-1, "ld a, b", 0x78, 1);                                  } /* LD   A,B         */
 OP(op,79) { A = C;       libRR_log_instruction(PC-1, "ld a, c", 0x79, 1);                                  } /* LD   A,C         */
 OP(op,7a) { A = D;       libRR_log_instruction(PC-1, "ld a, d", 0x7a, 1);                                  } /* LD   A,D         */
 OP(op,7b) { A = E;       libRR_log_instruction(PC-1, "ld a, e", 0x7b, 1);                                  } /* LD   A,E         */
 OP(op,7c) { A = H;       libRR_log_instruction(PC-1, "ld a, h", 0x7c, 1);                                  } /* LD   A,H         */
 OP(op,7d) { A = L;       libRR_log_instruction(PC-1, "ld a, l", 0x7d, 1);                                  } /* LD   A,L         */
-OP(op,7e) { A = RM(HL);  libRR_log_instruction(PC-1, "ld a, [hl]", 0x7e, 1);                                  } /* LD   A,(HL)      */
+OP(op,7e) { A = RM(HL);  libRR_log_instruction(PC-1, "ld a, [hl]", 0x7e, 1);                               } /* LD   A,(HL)      */
 OP(op,7f) {              libRR_log_instruction(PC-1, "ld a, a", 0x7f, 1);                                  } /* LD   A,A         */
 
-OP(op,80) { ADD(B);      libRR_log_instruction(PC-1, "add a, b", 0x80, 1);                                  } /* ADD  A,B         */
+OP(op,80) { ADD(B);      libRR_log_instruction(PC-1, "add a, b", 0x80, 1);                                 } /* ADD  A,B         */
 OP(op,81) { ADD(C);      libRR_log_instruction(PC-1, "add a, c", 0x81, 1);                                 } /* ADD  A,C         */
 OP(op,82) { ADD(D);      libRR_log_instruction(PC-1, "add a, d", 0x82, 1);                                 } /* ADD  A,D         */
 OP(op,83) { ADD(E);      libRR_log_instruction(PC-1, "add a, e", 0x83, 1);                                 } /* ADD  A,E         */
@@ -3103,7 +3110,7 @@ OP(op,8d) { ADC(L);      libRR_log_instruction(PC-1, "adc a, l", 0x8d, 1);      
 OP(op,8e) { ADC(RM(HL)); libRR_log_instruction(PC-1, "adc a, [hl]", 0x8e, 1);                              } /* ADC  A,(HL)      */
 OP(op,8f) { ADC(A);      libRR_log_instruction(PC-1, "adc a, a", 0x8f, 1);                                 } /* ADC  A,A         */
 
-OP(op,90) { SUB(B);      libRR_log_instruction(PC-1, "sub b", 0x90, 1);                                   } /* SUB  B           */
+OP(op,90) { SUB(B);      libRR_log_instruction(PC-1, "sub b", 0x90, 1);                                    } /* SUB  B           */
 OP(op,91) { SUB(C);      libRR_log_instruction(PC-1, "sub c", 0x91, 1);                                    } /* SUB  C           */
 OP(op,92) { SUB(D);      libRR_log_instruction(PC-1, "sub d", 0x92, 1);                                    } /* SUB  D           */
 OP(op,93) { SUB(E);      libRR_log_instruction(PC-1, "sub e", 0x93, 1);                                    } /* SUB  E           */
@@ -3145,7 +3152,7 @@ OP(op,b2) { OR(D);       libRR_log_instruction(PC-1, "or d", 0xb2, 1);          
 OP(op,b3) { OR(E);       libRR_log_instruction(PC-1, "or e", 0xb3, 1);                                     } /* OR   E           */
 OP(op,b4) { OR(H);       libRR_log_instruction(PC-1, "or h", 0xb4, 1);                                     } /* OR   H           */
 OP(op,b5) { OR(L);       libRR_log_instruction(PC-1, "or l", 0xb5, 1);                                     } /* OR   L           */
-OP(op,b6) { OR(RM(HL));  libRR_log_instruction(PC-1, "or [hl]", 0xb6, 1);                                     } /* OR   (HL)        */
+OP(op,b6) { OR(RM(HL));  libRR_log_instruction(PC-1, "or [hl]", 0xb6, 1);                                  } /* OR   (HL)        */
 OP(op,b7) { OR(A);       libRR_log_instruction(PC-1, "or a", 0xb7, 1);                                     } /* OR   A           */
 
 OP(op,b8) { CP(B);       libRR_log_instruction(PC-1, "cp b", 0xb8, 1);                                     } /* CP   B           */
@@ -3158,76 +3165,76 @@ OP(op,be) { CP(RM(HL));  libRR_log_instruction(PC-1, "cp [hl]", 0xbe, 1);       
 OP(op,bf) { CP(A);       libRR_log_instruction(PC-1, "cp a", 0xbf, 1);                                     } /* CP   A           */
 
 OP(op,c0) { RET_COND( !(F & ZF), 0xc0 );  libRR_log_instruction(PC-1, "ret nz", 0xc0, 1);                  } /* RET  NZ          */
-OP(op,c1) { POP( bc );                    libRR_log_instruction(PC-1, "pop bc", 0xc1, 1);                 } /* POP  BC          */
-OP(op,c2) { JP_COND( !(F & ZF) );                                                                          } /* JP   NZ,a        */
-OP(op,c3) { JP;                                                                                            } /* JP   a           */
-OP(op,c4) { CALL_COND( !(F & ZF), 0xc4 );                                                                  } /* CALL NZ,a        */
-OP(op,c5) { PUSH( bc );                   libRR_log_instruction(PC-1, "push bc", 0xc5, 1);                 } /* PUSH BC          */
-OP(op,c6) { ADD(ARG());                                                                                    } /* ADD  A,n         */
-OP(op,c7) { RST(0x00);                    libRR_log_instruction(PC-1, "rst $00", 0xc7, 1);                 } /* RST  0           */
+OP(op,c1) { POP( bc );                    libRR_log_instruction(PC-1, "pop bc", 0xc1, 1);                  } /* POP  BC          */
+OP(op,c2) { JP_COND( !(F & ZF) );         libRR_log_instruction_1int(PC-1, "jp nz, %int%", 0xc2, 3, 0 /*TODO*/ );  } /* JP   NZ,a        */
+OP(op,c3) { JP;                           libRR_log_instruction_1int(PC-1, "jp %int%", 0xc3, 3, 0 /*TODO*/ ); } /* JP   a           */
+OP(op,c4) { CALL_COND( !(F & ZF), 0xc4 ); libRR_log_instruction_1int(PC-1, "call nz, %int%", 0xc4, 3, 0 /*TODO*/ ); } /* CALL NZ,a        */
+OP(op,c5) { PUSH( bc );                   libRR_log_instruction(PC-1, "push bc", 0xc5, 1);                  } /* PUSH BC          */
+OP(op,c6) { TEMP=ARG(); ADD(TEMP);        libRR_log_instruction_1int(PC-1, "and a, %int%", 0xc6, 2, TEMP ); } /* ADD  A,n         */
+OP(op,c7) { RST(0x00);                    libRR_log_instruction(PC-1, "rst $00", 0xc7, 1);                  } /* RST  0           */
 
-OP(op,c8) { RET_COND( F & ZF, 0xc8 );     libRR_log_instruction(PC-1, "ret z", 0xc8, 1);                   } /* RET  Z           */
+OP(op,c8) { RET_COND( F & ZF, 0xc8 );     libRR_log_instruction(PC-1, "ret z", 0xc8, 1);                    } /* RET  Z           */
 OP(op,c9) { POP( pc ); WZ=PCD;  /*doesn't call ret possible bug?*/   libRR_log_instruction(PC-1, "ret", 0xc9, 1);                     } /* RET              */
-OP(op,ca) { JP_COND( F & ZF );                                                                             } /* JP   Z,a         */
-OP(op,cb) { R++; EXEC(cb,ROP());                                                                           } /* **** CB xx       */
-OP(op,cc) { CALL_COND( F & ZF, 0xcc );                                                                     } /* CALL Z,a         */
-OP(op,cd) { CALL();                                                                                        } /* CALL a           */
-OP(op,ce) { ADC(ARG());                                                                                    } /* ADC  A,n         */
-OP(op,cf) { RST(0x08);                    libRR_log_instruction(PC-1, "rst $08", 0xcf, 1);                 } /* RST  1           */
+OP(op,ca) { JP_COND( F & ZF );            libRR_log_instruction_1int(PC-1, "jp z, %int%", 0xca, 3, 0 /*TODO*/ ); } /* JP   Z,a         */
+OP(op,cb) { R++; EXEC(cb,ROP());                                                                            } /* **** CB xx       */
+OP(op,cc) { CALL_COND( F & ZF, 0xcc );    libRR_log_instruction_1int(PC-1, "call z, %int%", 0xcc, 3, 0 /*TODO*/ ); } /* CALL Z,a         */
+OP(op,cd) { CALL();                       libRR_log_instruction_1int(PC-1, "call %int%", 0xcd, 3, 0 /*TODO*/ ); } /* CALL a           */
+OP(op,ce) { TEMP=ARG(); ADC(TEMP);        libRR_log_instruction_1int(PC-1, "adc a, %int%", 0xce, 2, TEMP );  } /* ADC  A,n         */
+OP(op,cf) { RST(0x08);                    libRR_log_instruction(PC-1, "rst $08", 0xcf, 1);                   } /* RST  1           */
 
-OP(op,d0) { RET_COND( !(F & CF), 0xd0 );  libRR_log_instruction(PC-1, "ret nc", 0xd0, 1);                  } /* RET  NC          */
-OP(op,d1) { POP( de );                    libRR_log_instruction(PC-1, "pop de", 0xd1, 1);                  } /* POP  DE          */
-OP(op,d2) { JP_COND( !(F & CF) );                                                                          } /* JP   NC,a        */
-OP(op,d3) { unsigned n = ARG() | (A << 8); OUT( n, A ); WZ_L = ((n & 0xff) + 1) & 0xff;  WZ_H = A; } /* OUT  (n),A       */
-OP(op,d4) { CALL_COND( !(F & CF), 0xd4 );                                                                  } /* CALL NC,a        */
-OP(op,d5) { PUSH( de );                  libRR_log_instruction(PC-1, "push de", 0xd5, 1);                  } /* PUSH DE          */
-OP(op,d6) { SUB(ARG());                                                                                    } /* SUB  n           */
-OP(op,d7) { RST(0x10);                   libRR_log_instruction(PC-1, "rst $10", 0xd7, 1);                  } /* RST  2           */
+OP(op,d0) { RET_COND( !(F & CF), 0xd0 );  libRR_log_instruction(PC-1, "ret nc", 0xd0, 1);                    } /* RET  NC          */
+OP(op,d1) { POP( de );                    libRR_log_instruction(PC-1, "pop de", 0xd1, 1);                    } /* POP  DE          */
+OP(op,d2) { JP_COND( !(F & CF) );         libRR_log_instruction_1int(PC-1, "jp nc, %int%", 0xd2, 3, 0 /*TODO*/ ); } /* JP   NC,a        */
+OP(op,d3) { TEMP=ARG(); unsigned n = TEMP | (A << 8); OUT( n, A ); WZ_L = ((n & 0xff) + 1) & 0xff;  WZ_H = A; libRR_log_instruction_1int(PC-1, "out [%int%], a", 0xd3, 2, TEMP ); } /* OUT  (n),A       */
+OP(op,d4) { CALL_COND( !(F & CF), 0xd4 ); libRR_log_instruction_1int(PC-1, "call nc, %int%", 0xd4, 3, 0 /*TODO*/ ); } /* CALL NC,a        */
+OP(op,d5) { PUSH( de );                   libRR_log_instruction(PC-1, "push de", 0xd5, 1);                   } /* PUSH DE          */
+OP(op,d6) { TEMP=ARG(); SUB(TEMP);        libRR_log_instruction_1int(PC-1, "sub %int%", 0xd6, 2, TEMP );     } /* SUB  n           */
+OP(op,d7) { RST(0x10);                    libRR_log_instruction(PC-1, "rst $10", 0xd7, 1);                   } /* RST  2           */
 
-OP(op,d8) { RET_COND( F & CF, 0xd8 );    libRR_log_instruction(PC-1, "ret c", 0xd8, 1);                    } /* RET  C           */
-OP(op,d9) { EXX;                         libRR_log_instruction(PC-1, "exx", 0xd9, 1);                      } /* EXX              */
-OP(op,da) { JP_COND( F & CF );                                                                             } /* JP   C,a         */
-OP(op,db) { unsigned n = ARG() | (A << 8); A = IN( n ); WZ = n + 1;                                        } /* IN   A,(n)       */
-OP(op,dc) { CALL_COND( F & CF, 0xdc );                                                                     } /* CALL C,a         */
-OP(op,dd) { R++; EXEC(dd,ROP());                                                                           } /* **** DD xx       */
-OP(op,de) { SBC(ARG());                                                                                    } /* SBC  A,n         */
-OP(op,df) { RST(0x18);                    libRR_log_instruction(PC-1, "rst $18", 0xdf, 1);                 } /* RST  3           */
+OP(op,d8) { RET_COND( F & CF, 0xd8 );    libRR_log_instruction(PC-1, "ret c", 0xd8, 1);                      } /* RET  C           */
+OP(op,d9) { EXX;                         libRR_log_instruction(PC-1, "exx", 0xd9, 1);                        } /* EXX              */
+OP(op,da) { JP_COND( F & CF );           libRR_log_instruction_1int(PC-1, "jp c, %int%", 0xda, 3, 0 /*TODO*/ );  } /* JP   C,a         */
+OP(op,db) { TEMP=ARG; unsigned n = ARG() | (A << 8); A = IN( n ); WZ = n + 1; libRR_log_instruction_1int(PC-1, "in a, [%int%]", 0xdb, 2, TEMP ); } /* IN   A,(n)       */
+OP(op,dc) { CALL_COND( F & CF, 0xdc );   libRR_log_instruction_1int(PC-1, "call c, %int%", 0xdc, 3, 0 /*TODO*/ ); } /* CALL C,a         */
+OP(op,dd) { R++; EXEC(dd,ROP());                                                                             } /* **** DD xx       */
+OP(op,de) { TEMP=ARG(); SBC(TEMP);        libRR_log_instruction_1int(PC-1, "sbc a, %int%", 0xde, 2, TEMP );  } /* SBC  A,n         */
+OP(op,df) { RST(0x18);                    libRR_log_instruction(PC-1, "rst $18", 0xdf, 1);                   } /* RST  3           */
 
-OP(op,e0) { RET_COND( !(F & PF), 0xe0 );  libRR_log_instruction(PC-1, "ret po", 0xe0, 1);                  } /* RET  PO          */
-OP(op,e1) { POP( hl );                    libRR_log_instruction(PC-1, "pop hl", 0xe1, 1);                  } /* POP  HL          */
-OP(op,e2) { JP_COND( !(F & PF) );                                                                          } /* JP   PO,a        */
-OP(op,e3) { EXSP( hl );                   libRR_log_instruction(PC-1, "ex hl, [sp]", 0xe4, 1);             } /* EX   HL,(SP)     */
-OP(op,e4) { CALL_COND( !(F & PF), 0xe4 );                                                                  } /* CALL PO,a        */
-OP(op,e5) { PUSH( hl );                 libRR_log_instruction(PC-1, "push hl", 0xe5, 1);                   } /* PUSH HL          */
-OP(op,e6) { AND(ARG());                                                                                    } /* AND  n           */
-OP(op,e7) { RST(0x20);                  libRR_log_instruction(PC-1, "rst $20", 0xe7, 1);                   } /* RST  4           */
+OP(op,e0) { RET_COND( !(F & PF), 0xe0 );  libRR_log_instruction(PC-1, "ret po", 0xe0, 1);                    } /* RET  PO          */
+OP(op,e1) { POP( hl );                    libRR_log_instruction(PC-1, "pop hl", 0xe1, 1);                    } /* POP  HL          */
+OP(op,e2) { JP_COND( !(F & PF) );         libRR_log_instruction_1int(PC-1, "jp po, %int%", 0xe2, 3, 0 /*TODO*/ ); } /* JP   PO,a        */
+OP(op,e3) { EXSP( hl );                   libRR_log_instruction(PC-1, "ex hl, [sp]", 0xe3, 1);               } /* EX   HL,(SP)     */
+OP(op,e4) { CALL_COND( !(F & PF), 0xe4 ); libRR_log_instruction_1int(PC-1, "call po, %int%", 0xe4, 3, 0 /*TODO*/ );  } /* CALL PO,a        */
+OP(op,e5) { PUSH( hl );                 libRR_log_instruction(PC-1, "push hl", 0xe5, 1);                     } /* PUSH HL          */
+OP(op,e6) { TEMP=ARG(); AND(TEMP);      libRR_log_instruction_1int(PC-1, "and %int%", 0xe6, 2, TEMP );            } /* AND  n           */
+OP(op,e7) { RST(0x20);                  libRR_log_instruction(PC-1, "rst $20", 0xe7, 1);                     } /* RST  4           */
 
-OP(op,e8) { RET_COND( F & PF, 0xe8 );    libRR_log_instruction(PC-1, "ret pe", 0xe8, 1);                   } /* RET  PE          */
-OP(op,e9) { PC = HL;                     libRR_log_instruction(PC-1, "jp [hl]", 0xe9, 1);                  } /* JP   (HL)        */
-OP(op,ea) { JP_COND( F & PF );                                                                             } /* JP   PE,a        */
+OP(op,e8) { RET_COND( F & PF, 0xe8 );    libRR_log_instruction(PC-1, "ret pe", 0xe8, 1);                     } /* RET  PE          */
+OP(op,e9) { PC = HL;                     libRR_log_instruction(PC-1, "jp [hl]", 0xe9, 1);                    } /* JP   (HL)        */
+OP(op,ea) { JP_COND( F & PF );           libRR_log_instruction_1int(PC-1, "jp pe, %int%", 0xea, 3, 0 /*TODO*/ ); } /* JP   PE,a        */
 OP(op,eb) { EX_DE_HL;                    libRR_log_instruction(PC-1, "ex de, hl", 0xeb, 1);                  } /* EX   DE,HL       */
-OP(op,ec) { CALL_COND( F & PF, 0xec );                                                                     } /* CALL PE,a        */
-OP(op,ed) { R++; EXEC(ed,ROP());                                                                           } /* **** ED xx       */
-OP(op,ee) { XOR(ARG());                                                                                    } /* XOR  n           */
-OP(op,ef) { RST(0x28);                   libRR_log_instruction(PC-1, "rst $28", 0xef, 1);                  } /* RST  5           */
+OP(op,ec) { CALL_COND( F & PF, 0xec );   libRR_log_instruction_1int(PC-1, "call pe, %int%", 0xec, 3, 0 /*TODO*/ ); } /* CALL PE,a        */
+OP(op,ed) { R++; EXEC(ed,ROP());                                                                             } /* **** ED xx       */
+OP(op,ee) { TEMP=ARG(); XOR(TEMP);       libRR_log_instruction_1int(PC-1, "xor %int%", 0xee, 2, TEMP );      } /* XOR  n           */
+OP(op,ef) { RST(0x28);                   libRR_log_instruction(PC-1, "rst $28", 0xef, 1);                    } /* RST  5           */
 
-OP(op,f0) { RET_COND( !(F & SF), 0xf0 );  libRR_log_instruction(PC-1, "ret p", 0xf0, 1);                   } /* RET  P           */
-OP(op,f1) { POP( af );                    libRR_log_instruction(PC-1, "pop af", 0xf1, 1);                  } /* POP  AF          */
-OP(op,f2) { JP_COND( !(F & SF) );                                                                          } /* JP   P,a         */
-OP(op,f3) { IFF1 = IFF2 = 0;              libRR_log_instruction(PC-1, "di", 0xf3, 1);                      } /* DI               */
-OP(op,f4) { CALL_COND( !(F & SF), 0xf4 );                                                                  } /* CALL P,a         */
-OP(op,f5) { PUSH( af );                   libRR_log_instruction(PC-1, "push af", 0xf5, 1);                 } /* PUSH AF          */
-OP(op,f6) { OR(ARG());                                                                                     } /* OR   n           */
-OP(op,f7) { RST(0x30);                    libRR_log_instruction(PC-1, "rst $30", 0xf7, 1);                 } /* RST  6           */
+OP(op,f0) { RET_COND( !(F & SF), 0xf0 );  libRR_log_instruction(PC-1, "ret p", 0xf0, 1);                     } /* RET  P           */
+OP(op,f1) { POP( af );                    libRR_log_instruction(PC-1, "pop af", 0xf1, 1);                    } /* POP  AF          */
+OP(op,f2) { JP_COND( !(F & SF) );         libRR_log_instruction_1int(PC-1, "jp p, %int%", 0xf2, 3, 0 /*TODO*/ ); } /* JP   P,a         */
+OP(op,f3) { IFF1 = IFF2 = 0;              libRR_log_instruction(PC-1, "di", 0xf3, 1);                        } /* DI               */
+OP(op,f4) { CALL_COND( !(F & SF), 0xf4 ); libRR_log_instruction_1int(PC-1, "call p, %int%", 0xf4, 3, 0 /*TODO*/ ); } /* CALL P,a         */
+OP(op,f5) { PUSH( af );                   libRR_log_instruction(PC-1, "push af", 0xf5, 1);                   } /* PUSH AF          */
+OP(op,f6) { TEMP=ARG(); OR(TEMP);         libRR_log_instruction_1int(PC-1, "or %int%", 0xf6, 2, TEMP );      } /* OR   n           */
+OP(op,f7) { RST(0x30);                    libRR_log_instruction(PC-1, "rst $30", 0xf7, 1);                   } /* RST  6           */
 
-OP(op,f8) { RET_COND( F & SF, 0xf8 );     libRR_log_instruction(PC-1, "ret m", 0xf8, 1);                   } /* RET  M           */
-OP(op,f9) { SP = HL;                                                                                       } /* LD   SP,HL       */
-OP(op,fa) { JP_COND(F & SF);                                                                               } /* JP   M,a         */
-OP(op,fb) { EI;                           libRR_log_instruction(PC-1, "ei", 0xfb, 1);                      } /* EI               */
-OP(op,fc) { CALL_COND( F & SF, 0xfc );                                                                     } /* CALL M,a         */
-OP(op,fd) { R++; EXEC(fd,ROP());                                                                           } /* **** FD xx       */
-OP(op,fe) { CP(ARG());                                                                                     } /* CP   n           */
-OP(op,ff) { RST(0x38);                    libRR_log_instruction(PC-1, "rst $38", 0xff, 1);                 } /* RST  7           */
+OP(op,f8) { RET_COND( F & SF, 0xf8 );     libRR_log_instruction(PC-1, "ret m", 0xf8, 1);                     } /* RET  M           */
+OP(op,f9) { SP = HL;                      libRR_log_instruction(PC-1, "ld sp, hl", 0xf9, 1);                 } /* LD   SP,HL       */
+OP(op,fa) { JP_COND(F & SF);              libRR_log_instruction_1int(PC-1, "jp m, %int%", 0xfa, 3, 0 /*TODO*/ ); } /* JP   M,a         */
+OP(op,fb) { EI;                           libRR_log_instruction(PC-1, "ei", 0xfb, 1);                        } /* EI               */
+OP(op,fc) { CALL_COND( F & SF, 0xfc );    libRR_log_instruction_1int(PC-1, "call m, %int%", 0xfc, 3, 0 /*TODO*/ );  } /* CALL M,a         */
+OP(op,fd) { R++; EXEC(fd,ROP());                                                                             } /* **** FD xx       */
+OP(op,fe) { TEMP=ARG(); CP(TEMP);         libRR_log_instruction_1int(PC-1, "cp %int%", 0xfe, 2, TEMP);       } /* CP   n           */
+OP(op,ff) { RST(0x38);                    libRR_log_instruction(PC-1, "rst $38", 0xff, 1);                   } /* RST  7           */
 
 
 static void take_interrupt(void)
