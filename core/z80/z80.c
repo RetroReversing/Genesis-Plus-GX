@@ -710,9 +710,11 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * JP
  ***************************************************************/
-#define JP {                                    \
-  PCD = ARG16();                                \
-  WZ = PCD;                                     \
+#define JP {                                     \
+  TEMP=ARG16();                                  \
+  libRR_log_long_jump(PC, TEMP, "jp");           \
+  PCD = TEMP;                                    \
+  WZ = PCD;                                      \
 }
 
 /***************************************************************
@@ -721,7 +723,9 @@ INLINE UINT32 ARG16(void)
 #define JP_COND(cond) {                         \
   if (cond)                                     \
   {                                             \
-    PCD = ARG16();                              \
+    TEMP=ARG16();                               \
+    libRR_log_long_jump(PC, TEMP, "jp_cc_a16"); \
+    PCD = TEMP;                                 \
     WZ = PCD;                                   \
   }                                             \
   else                                          \
@@ -735,6 +739,7 @@ INLINE UINT32 ARG16(void)
  ***************************************************************/
 #define JR() {                                            \
   INT8 arg = (INT8)ARG(); /* ARG() also increments PC */  \
+  const char* label_name = libRR_log_jump_label(arg, PC-1); \
   PC += arg;        /* so don't do PC += ARG() */         \
   WZ = PC;                                                \
 }
