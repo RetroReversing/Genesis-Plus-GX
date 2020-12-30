@@ -232,19 +232,19 @@ void libRR_log_ddcb_inst(unsigned pc) {
 
   switch (opcode >> 3) {
         case 0:
-              libRR_log_instruction_1int_registername(current_pc, "ddcb rlc %r%", b2b1, 2, opcode, get_src_name(opcode));
+              libRR_log_instruction_1int_registername(current_pc, "rlc %r%", b2b1, 2, opcode, get_src_name(opcode));
             break;
         case 1:
-              libRR_log_instruction_1int_registername(current_pc, "ddcb rrc %r%", b2b1, 2, opcode, get_src_name(opcode));
+              libRR_log_instruction_1int_registername(current_pc, "rrc %r%", b2b1, 2, opcode, get_src_name(opcode));
             break;
         case 2:
-              libRR_log_instruction_1int_registername(current_pc, "ddcb rl %r%", b2b1, 2, opcode, get_src_name(opcode));
+              libRR_log_instruction_1int_registername(current_pc, "rl %r%", b2b1, 2, opcode, get_src_name(opcode));
             break;
         case 3:
-              libRR_log_instruction_1int_registername(current_pc, "ddcb rr %r%", b2b1, 2, opcode, get_src_name(opcode));
+              libRR_log_instruction_1int_registername(current_pc, "rr %r%", b2b1, 2, opcode, get_src_name(opcode));
             break;
         case 4:
-              libRR_log_instruction_1int_registername(current_pc, "ddcb sla %r%", b2b1, 2, opcode, get_src_name(opcode));
+              libRR_log_instruction_1int_registername(current_pc, "sla %r%", b2b1, 2, opcode, get_src_name(opcode));
             break;
         case 5:
             libRR_log_instruction_1int_registername(current_pc, "ddcb sra %r%", b2b1, 2, opcode, get_src_name(opcode));
@@ -2294,12 +2294,12 @@ OP(dd,1e) { illegal_1(); op_1e();                             } /* DB   DD      
 OP(dd,1f) { illegal_1(); op_1f();                             } /* DB   DD       */
 
 OP(dd,20) { illegal_1(); op_20();                             } /* DB   DD       */
-OP(dd,21) { libRR_log_instruction(PC-2, "LD IX,%int%", 0x00, 4); IX = ARG16();                                     } /* LD   IX,w     */
+OP(dd,21) { IX = ARG16(); libRR_log_instruction_1int(PC-4, "LD IX,%int%", 0x00, 4, IX);                                      } /* LD   IX,w     */
 OP(dd,22) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD (%int%),IX", 0x00, 4, EA);  WM16( EA, &Z80.ix ); WZ = EA+1;     } /* LD   (w),IX   */
 OP(dd,23) { libRR_log_instruction(PC-2, "inc ix", 0xdd23, 2);     IX++;   } /* INC  IX       */
 OP(dd,24) { libRR_log_instruction(PC-2, "inc hx", 0xdd24, 2);     HX = INC(HX);                                     } /* INC  HX       */
 OP(dd,25) { libRR_log_instruction(PC-2, "dec hx", 0xdd25, 2); HX = DEC(HX);                 } /* DEC  HX       */
-OP(dd,26) { HX = ARG(); libRR_log_instruction(PC-3, "LD HX,%int%", 0x00, 3, HX);                                        } /* LD   HX,n     */
+OP(dd,26) { HX = ARG(); libRR_log_instruction_1int(PC-3, "LD HX,%int%", 0x00, 3, HX);                                        } /* LD   HX,n     */
 OP(dd,27) { illegal_1(); op_27();                             } /* DB   DD       */
 
 OP(dd,28) { illegal_1(); op_28();                             } /* DB   DD       */
@@ -2585,8 +2585,8 @@ OP(fd,1e) { illegal_1(); op_1e();                             } /* DB   FD      
 OP(fd,1f) { illegal_1(); op_1f();                             } /* DB   FD       */
 
 OP(fd,20) { illegal_1(); op_20();                             } /* DB   FD       */
-OP(fd,21) { IY = ARG16(); libRR_log_instruction_1int(PC-3, "LD   IY,%int%", 0xfd21, 4, IY);                                      } /* LD   IY,w     */
-OP(fd,22) { EA = ARG16(); libRR_log_instruction_1int(PC-2, "LD   (%int%),IY", 0xfd22, 4, EA);  WM16( EA, &Z80.iy ); WZ = EA+1;     } /* LD   (w),IY   */
+OP(fd,21) { IY = ARG16(); libRR_log_instruction_1int(PC-4, "LD   IY,%int%", 0xfd21, 4, IY);                                      } /* LD   IY,w     */
+OP(fd,22) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   (%int%),IY", 0xfd22, 4, EA);  WM16( EA, &Z80.iy ); WZ = EA+1;     } /* LD   (w),IY   */
 OP(fd,23) { libRR_log_instruction(PC-2, "INC  IY", 0xfd23, 2); IY++;                                             } /* INC  IY       */
 OP(fd,24) { libRR_log_instruction(PC-2, "INC  HY", 0xfd24, 2); HY = INC(HY);                                     } /* INC  HY       */
 OP(fd,25) { libRR_log_instruction(PC-2, "DEC HY", 0xfd25, 2); HY = DEC(HY);                                     } /* DEC  HY       */
@@ -2595,7 +2595,7 @@ OP(fd,27) { illegal_1(); op_27();                             } /* DB   FD      
 
 OP(fd,28) { illegal_1(); op_28();                             } /* DB   FD       */
 OP(fd,29) { libRR_log_instruction(PC-2, "ADD  IY,IY", 0xfd29, 2); ADD16(iy,iy);                                     } /* ADD  IY,IY    */
-OP(fd,2a) { EA = ARG16(); libRR_log_instruction_1int(PC-3, "LD IY,(%int%)", 0xfd2a, 4, EA);  RM16( EA, &Z80.iy ); WZ = EA+1;     } /* LD   IY,(w)   */
+OP(fd,2a) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD IY,(%int%)", 0xfd2a, 4, EA);  RM16( EA, &Z80.iy ); WZ = EA+1;     } /* LD   IY,(w)   */
 OP(fd,2b) { libRR_log_instruction(PC-2, "DEC  IY", 0xfd2b, 2); IY--;                                             } /* DEC  IY       */
 OP(fd,2c) { libRR_log_instruction(PC-2, "INC  LY", 0xfd2c, 2); LY = INC(LY);                                     } /* INC  LY       */
 OP(fd,2d) { libRR_log_instruction(PC-2, "DEC  LY", 0xfd2d, 2); LY = DEC(LY);                                     } /* DEC  LY       */
@@ -2919,76 +2919,76 @@ OP(ed,3d) { illegal_2();                                      } /* DB   ED      
 OP(ed,3e) { illegal_2();                                      } /* DB   ED      */
 OP(ed,3f) { illegal_2();                                      } /* DB   ED      */
 
-OP(ed,40) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); B = IN(BC); F = (F & CF) | SZP[B];                } /* IN   B,(C)   */
-OP(ed,41) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);OUT(BC, B);                                       } /* OUT  (C),B   */
-OP(ed,42) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);SBC16( bc );                                      } /* SBC  HL,BC   */
-OP(ed,43) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);EA = ARG16(); WM16( EA, &Z80.bc ); WZ = EA+1;     } /* LD   (w),BC  */
-OP(ed,44) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);NEG;                                              } /* NEG          */
-OP(ed,45) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);RETN;                                             } /* RETN;        */
-OP(ed,46) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);IM = 0;                                           } /* IM   0       */
-OP(ed,47) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2);LD_I_A;                                           } /* LD   I,A     */
+OP(ed,40) { libRR_log_instruction(PC-2, "IN   B,(C)", 0xed00, 2); B = IN(BC); F = (F & CF) | SZP[B];                } /* IN   B,(C)   */
+OP(ed,41) { libRR_log_instruction(PC-2, "OUT  (C),B", 0xed00, 2);OUT(BC, B);                                       } /* OUT  (C),B   */
+OP(ed,42) { libRR_log_instruction(PC-2, "SBC  HL,BC", 0xed00, 2);SBC16( bc );                                      } /* SBC  HL,BC   */
+OP(ed,43) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   (%int%),BC", 0xed00, 4, EA); WM16( EA, &Z80.bc ); WZ = EA+1;     } /* LD   (w),BC  */
+OP(ed,44) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2);NEG;                                              } /* NEG          */
+OP(ed,45) { libRR_log_instruction(PC-2, "RETN", 0xed00, 2);RETN;                                             } /* RETN;        */
+OP(ed,46) { libRR_log_instruction(PC-2, "IM   0", 0xed00, 2);IM = 0;                                           } /* IM   0       */
+OP(ed,47) { libRR_log_instruction(PC-2, "LD   I,A", 0xed00, 2);LD_I_A;                                           } /* LD   I,A     */
 
-OP(ed,48) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); C = IN(BC); F = (F & CF) | SZP[C];                } /* IN   C,(C)   */
-OP(ed,49) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, C);                                       } /* OUT  (C),C   */
-OP(ed,4a) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); ADC16( bc );                                      } /* ADC  HL,BC   */
-OP(ed,4b) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); RM16( EA, &Z80.bc ); WZ = EA+1;     } /* LD   BC,(w)  */
-OP(ed,4c) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,4d) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETI;                                             } /* RETI         */
-OP(ed,4e) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 0;                                           } /* IM   0       */
-OP(ed,4f) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LD_R_A;                                           } /* LD   R,A     */
+OP(ed,48) { libRR_log_instruction(PC-2, "IN   C,(C)", 0xed00, 2); C = IN(BC); F = (F & CF) | SZP[C];                } /* IN   C,(C)   */
+OP(ed,49) { libRR_log_instruction(PC-2, "OUT  (C),C", 0xed00, 2); OUT(BC, C);                                       } /* OUT  (C),C   */
+OP(ed,4a) { libRR_log_instruction(PC-2, "ADC  HL,BC", 0xed00, 2); ADC16( bc );                                      } /* ADC  HL,BC   */
+OP(ed,4b) { EA = ARG16(); libRR_log_instruction_1int(PC-4, " LD   BC,(%int%)", 0xed00, 4, EA);  RM16( EA, &Z80.bc ); WZ = EA+1;     } /* LD   BC,(w)  */
+OP(ed,4c) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,4d) { libRR_log_instruction(PC-2, "RETI", 0xed00, 2); RETI;                                             } /* RETI         */
+OP(ed,4e) { libRR_log_instruction(PC-2, "IM   0", 0xed00, 2); IM = 0;                                           } /* IM   0       */
+OP(ed,4f) { libRR_log_instruction(PC-2, "LD   R,A", 0xed00, 2); LD_R_A;                                           } /* LD   R,A     */
 
-OP(ed,50) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); D = IN(BC); F = (F & CF) | SZP[D];                } /* IN   D,(C)   */
-OP(ed,51) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, D);                                       } /* OUT  (C),D   */
-OP(ed,52) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); SBC16( de );                                      } /* SBC  HL,DE   */
-OP(ed,53) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); WM16( EA, &Z80.de ); WZ = EA+1;     } /* LD   (w),DE  */
-OP(ed,54) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,55) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETN;                                             } /* RETN;        */
-OP(ed,56) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 1;                                           } /* IM   1       */
-OP(ed,57) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LD_A_I;                                           } /* LD   A,I     */
+OP(ed,50) { libRR_log_instruction(PC-2, "IN   D,(C)", 0xed00, 2); D = IN(BC); F = (F & CF) | SZP[D];                } /* IN   D,(C)   */
+OP(ed,51) { libRR_log_instruction(PC-2, "OUT  (C),D", 0xed00, 2); OUT(BC, D);                                       } /* OUT  (C),D   */
+OP(ed,52) { libRR_log_instruction(PC-2, "SBC  HL,DE", 0xed00, 2); SBC16( de );                                      } /* SBC  HL,DE   */
+OP(ed,53) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   (%int%),DE", 0xed00, 4, EA);  WM16( EA, &Z80.de ); WZ = EA+1;     } /* LD   (w),DE  */
+OP(ed,54) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,55) { libRR_log_instruction(PC-2, "RETN", 0xed00, 2); RETN;                                             } /* RETN;        */
+OP(ed,56) { libRR_log_instruction(PC-2, "IM   1", 0xed00, 2); IM = 1;                                           } /* IM   1       */
+OP(ed,57) { libRR_log_instruction(PC-2, "LD   A,I", 0xed00, 2); LD_A_I;                                           } /* LD   A,I     */
 
-OP(ed,58) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); E = IN(BC); F = (F & CF) | SZP[E];                } /* IN   E,(C)   */
-OP(ed,59) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, E);                                       } /* OUT  (C),E   */
-OP(ed,5a) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); ADC16( de );                                      } /* ADC  HL,DE   */
-OP(ed,5b) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); RM16( EA, &Z80.de ); WZ = EA+1;     } /* LD   DE,(w)  */
-OP(ed,5c) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,5d) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETI;                                             } /* RETI         */
-OP(ed,5e) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 2;                                           } /* IM   2       */
-OP(ed,5f) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LD_A_R;                                           } /* LD   A,R     */
+OP(ed,58) { libRR_log_instruction(PC-2, "IN   E,(C)", 0xed00, 2); E = IN(BC); F = (F & CF) | SZP[E];                } /* IN   E,(C)   */
+OP(ed,59) { libRR_log_instruction(PC-2, "OUT  (C),E", 0xed00, 2); OUT(BC, E);                                       } /* OUT  (C),E   */
+OP(ed,5a) { libRR_log_instruction(PC-2, "ADC  HL,DE", 0xed00, 2); ADC16( de );                                      } /* ADC  HL,DE   */
+OP(ed,5b) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   DE,(%int%)", 0xed00, 4, EA);  RM16( EA, &Z80.de ); WZ = EA+1;     } /* LD   DE,(w)  */
+OP(ed,5c) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,5d) { libRR_log_instruction(PC-2, "RETI", 0xed00, 2); RETI;                                             } /* RETI         */
+OP(ed,5e) { libRR_log_instruction(PC-2, "IM   2", 0xed00, 2); IM = 2;                                           } /* IM   2       */
+OP(ed,5f) { libRR_log_instruction(PC-2, "LD   A,R", 0xed00, 2); LD_A_R;                                           } /* LD   A,R     */
 
-OP(ed,60) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); H = IN(BC); F = (F & CF) | SZP[H];                } /* IN   H,(C)   */
-OP(ed,61) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, H);                                       } /* OUT  (C),H   */
-OP(ed,62) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); SBC16( hl );                                      } /* SBC  HL,HL   */
-OP(ed,63) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); WM16( EA, &Z80.hl ); WZ = EA+1;     } /* LD   (w),HL  */
-OP(ed,64) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,65) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETN;                                             } /* RETN;        */
-OP(ed,66) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 0;                                           } /* IM   0       */
-OP(ed,67) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RRD;                                              } /* RRD  (HL)    */
+OP(ed,60) { libRR_log_instruction(PC-2, "IN   H,(C)", 0xed00, 2); H = IN(BC); F = (F & CF) | SZP[H];                } /* IN   H,(C)   */
+OP(ed,61) { libRR_log_instruction(PC-2, "OUT  (C),H", 0xed00, 2); OUT(BC, H);                                       } /* OUT  (C),H   */
+OP(ed,62) { libRR_log_instruction(PC-2, "SBC  HL,HL", 0xed00, 2); SBC16( hl );                                      } /* SBC  HL,HL   */
+OP(ed,63) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   (%int%),HL", 0xed00, 4, EA); WM16( EA, &Z80.hl ); WZ = EA+1;     } /* LD   (w),HL  */
+OP(ed,64) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,65) { libRR_log_instruction(PC-2, "RETN", 0xed00, 2); RETN;                                             } /* RETN;        */
+OP(ed,66) { libRR_log_instruction(PC-2, "IM   0", 0xed00, 2); IM = 0;                                           } /* IM   0       */
+OP(ed,67) { libRR_log_instruction(PC-2, "RRD  (HL)", 0xed00, 2); RRD;                                              } /* RRD  (HL)    */
 
-OP(ed,68) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); L = IN(BC); F = (F & CF) | SZP[L];                } /* IN   L,(C)   */
-OP(ed,69) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, L);                                       } /* OUT  (C),L   */
-OP(ed,6a) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); ADC16( hl );                                      } /* ADC  HL,HL   */
-OP(ed,6b) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); RM16( EA, &Z80.hl ); WZ = EA+1;     } /* LD   HL,(w)  */
-OP(ed,6c) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,6d) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETI;                                             } /* RETI         */
-OP(ed,6e) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 0;                                           } /* IM   0       */
-OP(ed,6f) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RLD;                                              } /* RLD  (HL)    */
+OP(ed,68) { libRR_log_instruction(PC-2, "IN   L,(C)", 0xed00, 2); L = IN(BC); F = (F & CF) | SZP[L];                } /* IN   L,(C)   */
+OP(ed,69) { libRR_log_instruction(PC-2, "OUT  (C),L", 0xed00, 2); OUT(BC, L);                                       } /* OUT  (C),L   */
+OP(ed,6a) { libRR_log_instruction(PC-2, "ADC  HL,HL", 0xed00, 2); ADC16( hl );                                      } /* ADC  HL,HL   */
+OP(ed,6b) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   HL,(%int%)", 0xed00, 4, EA); RM16( EA, &Z80.hl ); WZ = EA+1;     } /* LD   HL,(w)  */
+OP(ed,6c) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,6d) { libRR_log_instruction(PC-2, "RETI", 0xed00, 2); RETI;                                             } /* RETI         */
+OP(ed,6e) { libRR_log_instruction(PC-2, "IM   0", 0xed00, 2); IM = 0;                                           } /* IM   0       */
+OP(ed,6f) { libRR_log_instruction(PC-2, "RLD  (HL)", 0xed00, 2); RLD;                                              } /* RLD  (HL)    */
 
-OP(ed,70) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); UINT8 res = IN(BC); F = (F & CF) | SZP[res];      } /* IN   0,(C)   */
-OP(ed,71) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, 0);                                       } /* OUT  (C),0   */
-OP(ed,72) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); SBC16( sp );                                      } /* SBC  HL,SP   */
-OP(ed,73) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); WM16( EA, &Z80.sp ); WZ = EA+1;     } /* LD   (w),SP  */
-OP(ed,74) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,75) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETN;                                             } /* RETN;        */
-OP(ed,76) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 1;                                           } /* IM   1       */
+OP(ed,70) { libRR_log_instruction(PC-2, "IN   0,(C)", 0xed00, 2); UINT8 res = IN(BC); F = (F & CF) | SZP[res];      } /* IN   0,(C)   */
+OP(ed,71) { libRR_log_instruction(PC-2, "OUT  (C),0", 0xed00, 2); OUT(BC, 0);                                       } /* OUT  (C),0   */
+OP(ed,72) { libRR_log_instruction(PC-2, "SBC  HL,SP", 0xed00, 2); SBC16( sp );                                      } /* SBC  HL,SP   */
+OP(ed,73) { EA = ARG16(); libRR_log_instruction_1int(PC-4, " LD   (%int%),SP", 0xed00, 4, EA);  WM16( EA, &Z80.sp ); WZ = EA+1;     } /* LD   (w),SP  */
+OP(ed,74) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,75) { libRR_log_instruction(PC-2, "RETN", 0xed00, 2); RETN;                                             } /* RETN;        */
+OP(ed,76) { libRR_log_instruction(PC-2, "IM   1", 0xed00, 2); IM = 1;                                           } /* IM   1       */
 OP(ed,77) { illegal_2();                                      } /* DB   ED,77   */
 
-OP(ed,78) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); A = IN(BC); F = (F & CF) | SZP[A]; WZ = BC+1;     } /* IN   E,(C)   */
-OP(ed,79) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUT(BC, A); WZ = BC + 1;                          } /* OUT  (C),A   */
-OP(ed,7a) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); ADC16( sp );                                      } /* ADC  HL,SP   */
-OP(ed,7b) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); EA = ARG16(); RM16( EA, &Z80.sp ); WZ = EA+1; } /* LD   SP,(w)  */
-OP(ed,7c) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); NEG;                                              } /* NEG          */
-OP(ed,7d) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); RETI;                                             } /* RETI         */
-OP(ed,7e) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IM = 2;                                           } /* IM   2       */
+OP(ed,78) { libRR_log_instruction(PC-2, "IN   E,(C)", 0xed00, 2); A = IN(BC); F = (F & CF) | SZP[A]; WZ = BC+1;     } /* IN   E,(C)   */
+OP(ed,79) { libRR_log_instruction(PC-2, "OUT  (C),A", 0xed00, 2); OUT(BC, A); WZ = BC + 1;                          } /* OUT  (C),A   */
+OP(ed,7a) { libRR_log_instruction(PC-2, "ADC  HL,SP", 0xed00, 2); ADC16( sp );                                      } /* ADC  HL,SP   */
+OP(ed,7b) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   SP,(%int%)", 0xed00, 4,EA);  RM16( EA, &Z80.sp ); WZ = EA+1; } /* LD   SP,(w)  */
+OP(ed,7c) { libRR_log_instruction(PC-2, "NEG", 0xed00, 2); NEG;                                              } /* NEG          */
+OP(ed,7d) { libRR_log_instruction(PC-2, "RETI", 0xed00, 2); RETI;                                             } /* RETI         */
+OP(ed,7e) { libRR_log_instruction(PC-2, "IM   2", 0xed00, 2); IM = 2;                                           } /* IM   2       */
 OP(ed,7f) { illegal_2();                                      } /* DB   ED,7F   */
 
 OP(ed,80) { illegal_2();                                      } /* DB   ED      */
@@ -3027,37 +3027,37 @@ OP(ed,9d) { illegal_2();                                      } /* DB   ED      
 OP(ed,9e) { illegal_2();                                      } /* DB   ED      */
 OP(ed,9f) { illegal_2();                                      } /* DB   ED      */
 
-OP(ed,a0) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LDI;                                              } /* LDI          */
-OP(ed,a1) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); CPI;                                              } /* CPI          */
-OP(ed,a2) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); INI;                                              } /* INI          */
-OP(ed,a3) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUTI;                                             } /* OUTI         */
+OP(ed,a0) { libRR_log_instruction(PC-2, "LDI", 0xed00, 2); LDI;                                              } /* LDI          */
+OP(ed,a1) { libRR_log_instruction(PC-2, "CPI", 0xed00, 2); CPI;                                              } /* CPI          */
+OP(ed,a2) { libRR_log_instruction(PC-2, "INI", 0xed00, 2); INI;                                              } /* INI          */
+OP(ed,a3) { libRR_log_instruction(PC-2, "OUTI", 0xed00, 2); OUTI;                                             } /* OUTI         */
 OP(ed,a4) { illegal_2();                                      } /* DB   ED      */
 OP(ed,a5) { illegal_2();                                      } /* DB   ED      */
 OP(ed,a6) { illegal_2();                                      } /* DB   ED      */
 OP(ed,a7) { illegal_2();                                      } /* DB   ED      */
 
-OP(ed,a8) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LDD;                                              } /* LDD          */
-OP(ed,a9) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); CPD;                                              } /* CPD          */
-OP(ed,aa) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); IND;                                              } /* IND          */
-OP(ed,ab) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OUTD;                                             } /* OUTD         */
+OP(ed,a8) { libRR_log_instruction(PC-2, "LDD", 0xed00, 2); LDD;                                              } /* LDD          */
+OP(ed,a9) { libRR_log_instruction(PC-2, "CPD", 0xed00, 2); CPD;                                              } /* CPD          */
+OP(ed,aa) { libRR_log_instruction(PC-2, "IND", 0xed00, 2); IND;                                              } /* IND          */
+OP(ed,ab) { libRR_log_instruction(PC-2, "OUTD", 0xed00, 2); OUTD;                                             } /* OUTD         */
 OP(ed,ac) { illegal_2();                                      } /* DB   ED      */
 OP(ed,ad) { illegal_2();                                      } /* DB   ED      */
 OP(ed,ae) { illegal_2();                                      } /* DB   ED      */
 OP(ed,af) { illegal_2();                                      } /* DB   ED      */
 
-OP(ed,b0) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LDIR;                                             } /* LDIR         */
-OP(ed,b1) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); CPIR;                                             } /* CPIR         */
-OP(ed,b2) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); INIR;                                             } /* INIR         */
-OP(ed,b3) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OTIR;                                             } /* OTIR         */
+OP(ed,b0) { libRR_log_instruction(PC-2, "LDIR", 0xed00, 2); LDIR;                                             } /* LDIR         */
+OP(ed,b1) { libRR_log_instruction(PC-2, "CPIR", 0xed00, 2); CPIR;                                             } /* CPIR         */
+OP(ed,b2) { libRR_log_instruction(PC-2, "INIR", 0xed00, 2); INIR;                                             } /* INIR         */
+OP(ed,b3) { libRR_log_instruction(PC-2, "OTIR", 0xed00, 2); OTIR;                                             } /* OTIR         */
 OP(ed,b4) { illegal_2();                                      } /* DB   ED      */
 OP(ed,b5) { illegal_2();                                      } /* DB   ED      */
 OP(ed,b6) { illegal_2();                                      } /* DB   ED      */
 OP(ed,b7) { illegal_2();                                      } /* DB   ED      */
 
-OP(ed,b8) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); LDDR;                                             } /* LDDR         */
-OP(ed,b9) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); CPDR;                                             } /* CPDR         */
-OP(ed,ba) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); INDR;                                             } /* INDR         */
-OP(ed,bb) { libRR_log_instruction(PC-1, "TODO ED", 0xed00, 2); OTDR;                                             } /* OTDR         */
+OP(ed,b8) { libRR_log_instruction(PC-2, "LDDR", 0xed00, 2); LDDR;                                             } /* LDDR         */
+OP(ed,b9) { libRR_log_instruction(PC-2, "CPDR", 0xed00, 2); CPDR;                                             } /* CPDR         */
+OP(ed,ba) { libRR_log_instruction(PC-2, "INDR", 0xed00, 2); INDR;                                             } /* INDR         */
+OP(ed,bb) { libRR_log_instruction(PC-2, "OTDR", 0xed00, 2); OTDR;                                             } /* OTDR         */
 OP(ed,bc) { illegal_2();                                      } /* DB   ED      */
 OP(ed,bd) { illegal_2();                                      } /* DB   ED      */
 OP(ed,be) { illegal_2();                                      } /* DB   ED      */
@@ -3145,7 +3145,7 @@ OP(op,02) { WM( BC, A ); WZ_L = (BC + 1) & 0xFF;  WZ_H = A; libRR_log_instructio
 OP(op,03) { BC++;         libRR_log_instruction(PC-1, "inc bc", 0x03, 1);                              } /* INC  BC          */
 OP(op,04) { B = INC(B);   libRR_log_instruction(PC-1, "inc b", 0x04, 1);                               } /* INC  B           */
 OP(op,05) { B = DEC(B);   libRR_log_instruction(PC-1, "dec b", 0x05, 1);                               } /* DEC  B           */
-OP(op,06) { B = ARG();    libRR_log_instruction_1int(PC-2, "ld b, ", 0x06, 2, B);                      } /* LD   B,n         */
+OP(op,06) { B = ARG();    libRR_log_instruction_1int(PC-2, "ld b, %int%", 0x06, 2, B);                      } /* LD   B,n         */
 OP(op,07) { RLCA;         libRR_log_instruction(PC-1, "rcla", 0x07, 1);                                } /* RLCA             */
 
 OP(op,08) { EX_AF;        libRR_log_instruction(PC-1, "ex af, af'", 0x08, 1);                           } /* EX   AF,AF'      */
