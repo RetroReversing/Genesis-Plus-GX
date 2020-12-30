@@ -2267,7 +2267,7 @@ OP(dd,06) { illegal_1(); op_06();                             } /* DB   DD      
 OP(dd,07) { illegal_1(); op_07();                             } /* DB   DD       */
 
 OP(dd,08) { illegal_1(); op_08();                             } /* DB   DD       */
-OP(dd,09) { libRR_log_instruction(PC-1, "add ix, bc", 0x00, 2); ADD16(ix,bc);                                     } /* ADD  IX,BC    */
+OP(dd,09) { libRR_log_instruction(PC-2, "add ix, bc", 0xdd09, 2); ADD16(ix,bc);                                     } /* ADD  IX,BC    */
 OP(dd,0a) { illegal_1(); op_0a();                             } /* DB   DD       */
 OP(dd,0b) { illegal_1(); op_0b();                             } /* DB   DD       */
 OP(dd,0c) { illegal_1(); op_0c();                             } /* DB   DD       */
@@ -2285,7 +2285,7 @@ OP(dd,16) { illegal_1(); op_16();                             } /* DB   DD      
 OP(dd,17) { illegal_1(); op_17();                             } /* DB   DD       */
 
 OP(dd,18) { illegal_1(); op_18();                             } /* DB   DD       */
-OP(dd,19) { libRR_log_instruction(PC-1, "add ix, de", 0x00, 2); ADD16(ix,de);                                     } /* ADD  IX,DE    */
+OP(dd,19) { libRR_log_instruction(PC-2, "add ix, de", 0x00, 2); ADD16(ix,de);                                     } /* ADD  IX,DE    */
 OP(dd,1a) { illegal_1(); op_1a();                             } /* DB   DD       */
 OP(dd,1b) { illegal_1(); op_1b();                             } /* DB   DD       */
 OP(dd,1c) { illegal_1(); op_1c();                             } /* DB   DD       */
@@ -2294,34 +2294,34 @@ OP(dd,1e) { illegal_1(); op_1e();                             } /* DB   DD      
 OP(dd,1f) { illegal_1(); op_1f();                             } /* DB   DD       */
 
 OP(dd,20) { illegal_1(); op_20();                             } /* DB   DD       */
-OP(dd,21) { libRR_log_instruction(PC-2, "TODO IX", 0x00, 2); IX = ARG16();                                     } /* LD   IX,w     */
-OP(dd,22) { libRR_log_instruction(PC-2, "TODO IX", 0x00, 2); EA = ARG16(); WM16( EA, &Z80.ix ); WZ = EA+1;     } /* LD   (w),IX   */
+OP(dd,21) { libRR_log_instruction(PC-2, "LD IX,%int%", 0x00, 4); IX = ARG16();                                     } /* LD   IX,w     */
+OP(dd,22) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD (%int%),IX", 0x00, 4, EA);  WM16( EA, &Z80.ix ); WZ = EA+1;     } /* LD   (w),IX   */
 OP(dd,23) { libRR_log_instruction(PC-2, "inc ix", 0xdd23, 2);     IX++;   } /* INC  IX       */
 OP(dd,24) { libRR_log_instruction(PC-2, "inc hx", 0xdd24, 2);     HX = INC(HX);                                     } /* INC  HX       */
 OP(dd,25) { libRR_log_instruction(PC-2, "dec hx", 0xdd25, 2); HX = DEC(HX);                 } /* DEC  HX       */
-OP(dd,26) { libRR_log_instruction(PC-2, "TODO IX", 0x00, 2); HX = ARG();                                       } /* LD   HX,n     */
+OP(dd,26) { HX = ARG(); libRR_log_instruction(PC-3, "LD HX,%int%", 0x00, 3, HX);                                        } /* LD   HX,n     */
 OP(dd,27) { illegal_1(); op_27();                             } /* DB   DD       */
 
 OP(dd,28) { illegal_1(); op_28();                             } /* DB   DD       */
-OP(dd,29) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADD16(ix,ix);                                     } /* ADD  IX,IX    */
-OP(dd,2a) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EA = ARG16(); RM16( EA, &Z80.ix ); WZ = EA+1;     } /* LD   IX,(w)   */
-OP(dd,2b) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); IX--;                                             } /* DEC  IX       */
-OP(dd,2c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = INC(LX);                                     } /* INC  LX       */
-OP(dd,2d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = DEC(LX);                                     } /* DEC  LX       */
-OP(dd,2e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = ARG();                                       } /* LD   LX,n     */
+OP(dd,29) { libRR_log_instruction(PC-2, "ADD  IX,IX", 0xdd00, 2); ADD16(ix,ix);                                     } /* ADD  IX,IX    */
+OP(dd,2a) { EA = ARG16(); libRR_log_instruction_1int(PC-4, "LD   IX,(%int%)", 0xdd00, 4, EA);  RM16( EA, &Z80.ix ); WZ = EA+1;     } /* LD   IX,(w)   */
+OP(dd,2b) { libRR_log_instruction(PC-2, "DEC  IX", 0xdd00, 2); IX--;                                             } /* DEC  IX       */
+OP(dd,2c) { libRR_log_instruction(PC-2, "INC  LX", 0xdd00, 2); LX = INC(LX);                                     } /* INC  LX       */
+OP(dd,2d) { libRR_log_instruction(PC-2, "DEC  LX", 0xdd00, 2); LX = DEC(LX);                                     } /* DEC  LX       */
+OP(dd,2e) { LX = ARG(); libRR_log_instruction_1int(PC-3, "LD   LX,%int%", 0xdd00, 3, LX);                                       } /* LD   LX,n     */
 OP(dd,2f) { illegal_1(); op_2f();                             } /* DB   DD       */
 
 OP(dd,30) { illegal_1(); op_30();                             } /* DB   DD       */
 OP(dd,31) { illegal_1(); op_31();                             } /* DB   DD       */
 OP(dd,32) { illegal_1(); op_32();                             } /* DB   DD       */
 OP(dd,33) { illegal_1(); op_33();                             } /* DB   DD       */
-OP(dd,34) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, INC(RM(EA)) );                       } /* INC  (IX+o)   */
-OP(dd,35) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, DEC(RM(EA)) );                       } /* DEC  (IX+o)   */
-OP(dd,36) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, ARG() );                             } /* LD   (IX+o),n */
+OP(dd,34) { libRR_log_instruction(PC-2, "INC  (IX+o)", 0xdd00, 3); EAX; WM( EA, INC(RM(EA)) );                       } /* INC  (IX+o)   */
+OP(dd,35) { libRR_log_instruction(PC-2, " DEC  (IX+o)", 0xdd00, 3); EAX; WM( EA, DEC(RM(EA)) );                       } /* DEC  (IX+o)   */
+OP(dd,36) { libRR_log_instruction(PC-2, "LD   (IX+o),n", 0xdd00, 4); EAX; WM( EA, ARG() );                             } /* LD   (IX+o),n */
 OP(dd,37) { illegal_1(); op_37();                             } /* DB   DD       */
 
 OP(dd,38) { illegal_1(); op_38();                             } /* DB   DD       */
-OP(dd,39) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADD16(ix,sp);                                     } /* ADD  IX,SP    */
+OP(dd,39) { libRR_log_instruction(PC-2, "ADD  IX,SP", 0xdd00, 2); ADD16(ix,sp);                                     } /* ADD  IX,SP    */
 OP(dd,3a) { illegal_1(); op_3a();                             } /* DB   DD       */
 OP(dd,3b) { illegal_1(); op_3b();                             } /* DB   DD       */
 OP(dd,3c) { illegal_1(); op_3c();                             } /* DB   DD       */
@@ -2333,144 +2333,144 @@ OP(dd,40) { illegal_1(); op_40();                             } /* DB   DD      
 OP(dd,41) { illegal_1(); op_41();                             } /* DB   DD       */
 OP(dd,42) { illegal_1(); op_42();                             } /* DB   DD       */
 OP(dd,43) { illegal_1(); op_43();                             } /* DB   DD       */
-OP(dd,44) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); B = HX;                                           } /* LD   B,HX     */
-OP(dd,45) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); B = LX;                                           } /* LD   B,LX     */
-OP(dd,46) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; B = RM(EA);                                  } /* LD   B,(IX+o) */
+OP(dd,44) { libRR_log_instruction(PC-2, "LD   B,HX", 0xdd00, 2); B = HX;                                           } /* LD   B,HX     */
+OP(dd,45) { libRR_log_instruction(PC-2, "LD   B,LX", 0xdd00, 2); B = LX;                                           } /* LD   B,LX     */
+OP(dd,46) { libRR_log_instruction(PC-2, "LD   B,(IX+o)", 0xdd00, 3); EAX; B = RM(EA);                                  } /* LD   B,(IX+o) */
 OP(dd,47) { illegal_1(); op_47();                             } /* DB   DD       */
 
 OP(dd,48) { illegal_1(); op_48();                             } /* DB   DD       */
 OP(dd,49) { illegal_1(); op_49();                             } /* DB   DD       */
 OP(dd,4a) { illegal_1(); op_4a();                             } /* DB   DD       */
 OP(dd,4b) { illegal_1(); op_4b();                             } /* DB   DD       */
-OP(dd,4c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); C = HX;                                           } /* LD   C,HX     */
-OP(dd,4d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); C = LX;                                           } /* LD   C,LX     */
-OP(dd,4e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; C = RM(EA);                                  } /* LD   C,(IX+o) */
+OP(dd,4c) { libRR_log_instruction(PC-2, "LD   C,HX", 0xdd00, 2); C = HX;                                           } /* LD   C,HX     */
+OP(dd,4d) { libRR_log_instruction(PC-2, "LD   C,LX", 0xdd00, 2); C = LX;                                           } /* LD   C,LX     */
+OP(dd,4e) { libRR_log_instruction(PC-2, "LD   C,(IX+o)", 0xdd00, 3); EAX; C = RM(EA);                                  } /* LD   C,(IX+o) */
 OP(dd,4f) { illegal_1(); op_4f();                             } /* DB   DD       */
 
 OP(dd,50) { illegal_1(); op_50();                             } /* DB   DD       */
 OP(dd,51) { illegal_1(); op_51();                             } /* DB   DD       */
 OP(dd,52) { illegal_1(); op_52();                             } /* DB   DD       */
 OP(dd,53) { illegal_1(); op_53();                             } /* DB   DD       */
-OP(dd,54) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); D = HX;                                           } /* LD   D,HX     */
-OP(dd,55) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); D = LX;                                           } /* LD   D,LX     */
-OP(dd,56) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; D = RM(EA);                                  } /* LD   D,(IX+o) */
+OP(dd,54) { libRR_log_instruction(PC-2, "LD   D,HX", 0xdd00, 2); D = HX;                                           } /* LD   D,HX     */
+OP(dd,55) { libRR_log_instruction(PC-2, "LD   D,LX", 0xdd00, 2); D = LX;                                           } /* LD   D,LX     */
+OP(dd,56) { libRR_log_instruction(PC-2, "LD   D,(IX+o)", 0xdd00, 3); EAX; D = RM(EA);                                  } /* LD   D,(IX+o) */
 OP(dd,57) { illegal_1(); op_57();                             } /* DB   DD       */
 
 OP(dd,58) { illegal_1(); op_58();                             } /* DB   DD       */
 OP(dd,59) { illegal_1(); op_59();                             } /* DB   DD       */
 OP(dd,5a) { illegal_1(); op_5a();                             } /* DB   DD       */
 OP(dd,5b) { illegal_1(); op_5b();                             } /* DB   DD       */
-OP(dd,5c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); E = HX;                                           } /* LD   E,HX     */
-OP(dd,5d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); E = LX;                                           } /* LD   E,LX     */
-OP(dd,5e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; E = RM(EA);                                  } /* LD   E,(IX+o) */
+OP(dd,5c) { libRR_log_instruction(PC-2, "LD   E,HX", 0xdd00, 2); E = HX;                                           } /* LD   E,HX     */
+OP(dd,5d) { libRR_log_instruction(PC-2, "LD   E,LX", 0xdd00, 2); E = LX;                                           } /* LD   E,LX     */
+OP(dd,5e) { libRR_log_instruction(PC-2, "LD   E,(IX+o)", 0xdd00, 3); EAX; E = RM(EA);                                  } /* LD   E,(IX+o) */
 OP(dd,5f) { illegal_1(); op_5f();                             } /* DB   DD       */
 
-OP(dd,60) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = B;                                           } /* LD   HX,B     */
-OP(dd,61) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = C;                                           } /* LD   HX,C     */
-OP(dd,62) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = D;                                           } /* LD   HX,D     */
-OP(dd,63) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = E;                                           } /* LD   HX,E     */
-OP(dd,64) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2);                                                   } /* LD   HX,HX    */
-OP(dd,65) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = LX;                                          } /* LD   HX,LX    */
-OP(dd,66) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; H = RM(EA);                                  } /* LD   H,(IX+o) */
-OP(dd,67) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); HX = A;                                           } /* LD   HX,A     */
+OP(dd,60) { libRR_log_instruction(PC-2, "LD   HX,B", 0xdd00, 2); HX = B;                                           } /* LD   HX,B     */
+OP(dd,61) { libRR_log_instruction(PC-2, "LD   HX,C", 0xdd00, 2); HX = C;                                           } /* LD   HX,C     */
+OP(dd,62) { libRR_log_instruction(PC-2, "LD   HX,D", 0xdd00, 2); HX = D;                                           } /* LD   HX,D     */
+OP(dd,63) { libRR_log_instruction(PC-2, "LD   HX,E", 0xdd00, 2); HX = E;                                           } /* LD   HX,E     */
+OP(dd,64) { libRR_log_instruction(PC-2, "LD   HX,HX", 0xdd00, 2);                                                   } /* LD   HX,HX    */
+OP(dd,65) { libRR_log_instruction(PC-2, "LD   HX,LX", 0xdd00, 2); HX = LX;                                          } /* LD   HX,LX    */
+OP(dd,66) { libRR_log_instruction(PC-2, "LD   H,(IX+o)", 0xdd00, 3); EAX; H = RM(EA);                                  } /* LD   H,(IX+o) */
+OP(dd,67) { libRR_log_instruction(PC-2, "LD   HX,A", 0xdd00, 2); HX = A;                                           } /* LD   HX,A     */
 
-OP(dd,68) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = B;                                           } /* LD   LX,B     */
-OP(dd,69) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = C;                                           } /* LD   LX,C     */
-OP(dd,6a) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = D;                                           } /* LD   LX,D     */
-OP(dd,6b) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = E;                                           } /* LD   LX,E     */
-OP(dd,6c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = HX;                                          } /* LD   LX,HX    */
-OP(dd,6d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2);                                                   } /* LD   LX,LX    */
-OP(dd,6e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; L = RM(EA);                                  } /* LD   L,(IX+o) */
-OP(dd,6f) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); LX = A;                                           } /* LD   LX,A     */
+OP(dd,68) { libRR_log_instruction(PC-2, "LD   LX,B", 0xdd00, 2); LX = B;                                           } /* LD   LX,B     */
+OP(dd,69) { libRR_log_instruction(PC-2, "LD   LX,C", 0xdd00, 2); LX = C;                                           } /* LD   LX,C     */
+OP(dd,6a) { libRR_log_instruction(PC-2, "LD   LX,D", 0xdd00, 2); LX = D;                                           } /* LD   LX,D     */
+OP(dd,6b) { libRR_log_instruction(PC-2, "LD   LX,E", 0xdd00, 2); LX = E;                                           } /* LD   LX,E     */
+OP(dd,6c) { libRR_log_instruction(PC-2, "LD   LX,HX", 0xdd00, 2); LX = HX;                                          } /* LD   LX,HX    */
+OP(dd,6d) { libRR_log_instruction(PC-2, "LD   LX,LX", 0xdd00, 2);                                                   } /* LD   LX,LX    */
+OP(dd,6e) { libRR_log_instruction(PC-2, "LD   L,(IX+o)", 0xdd00, 3); EAX; L = RM(EA);                                  } /* LD   L,(IX+o) */
+OP(dd,6f) { libRR_log_instruction(PC-2, "LD   LX,A", 0xdd00, 2); LX = A;                                           } /* LD   LX,A     */
 
-OP(dd,70) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, B );                                 } /* LD   (IX+o),B */
-OP(dd,71) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, C );                                 } /* LD   (IX+o),C */
-OP(dd,72) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, D );                                 } /* LD   (IX+o),D */
-OP(dd,73) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, E );                                 } /* LD   (IX+o),E */
-OP(dd,74) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, H );                                 } /* LD   (IX+o),H */
-OP(dd,75) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, L );                                 } /* LD   (IX+o),L */
+OP(dd,70) { libRR_log_instruction(PC-2, "LD   (IX+o),B", 0xdd00, 3); EAX; WM( EA, B );                                 } /* LD   (IX+o),B */
+OP(dd,71) { libRR_log_instruction(PC-2, "LD   (IX+o),C", 0xdd00, 3); EAX; WM( EA, C );                                 } /* LD   (IX+o),C */
+OP(dd,72) { libRR_log_instruction(PC-2, "LD   (IX+o),D", 0xdd00, 3); EAX; WM( EA, D );                                 } /* LD   (IX+o),D */
+OP(dd,73) { libRR_log_instruction(PC-2, "LD   (IX+o),E", 0xdd00, 3); EAX; WM( EA, E );                                 } /* LD   (IX+o),E */
+OP(dd,74) { libRR_log_instruction(PC-2, "LD   (IX+o),H", 0xdd00, 3); EAX; WM( EA, H );                                 } /* LD   (IX+o),H */
+OP(dd,75) { libRR_log_instruction(PC-2, "LD   (IX+o),L", 0xdd00, 3); EAX; WM( EA, L );                                 } /* LD   (IX+o),L */
 OP(dd,76) { illegal_1(); op_76();                             } /* DB   DD       */
-OP(dd,77) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; WM( EA, A );                                 } /* LD   (IX+o),A */
+OP(dd,77) { libRR_log_instruction(PC-2, "LD   (IX+o),A", 0xdd00, 3); EAX; WM( EA, A );                                 } /* LD   (IX+o),A */
 
 OP(dd,78) { illegal_1(); op_78();                             } /* DB   DD       */
 OP(dd,79) { illegal_1(); op_79();                             } /* DB   DD       */
 OP(dd,7a) { illegal_1(); op_7a();                             } /* DB   DD       */
 OP(dd,7b) { illegal_1(); op_7b();                             } /* DB   DD       */
-OP(dd,7c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); A = HX;                                           } /* LD   A,HX     */
-OP(dd,7d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); A = LX;                                           } /* LD   A,LX     */
-OP(dd,7e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; A = RM(EA);                                  } /* LD   A,(IX+o) */
+OP(dd,7c) { libRR_log_instruction(PC-2, "LD   A,HX", 0xdd00, 2); A = HX;                                           } /* LD   A,HX     */
+OP(dd,7d) { libRR_log_instruction(PC-2, "LD   A,LX", 0xdd00, 2); A = LX;                                           } /* LD   A,LX     */
+OP(dd,7e) { libRR_log_instruction(PC-2, "LD   A,(IX+o)", 0xdd00, 3); EAX; A = RM(EA);                                  } /* LD   A,(IX+o) */
 OP(dd,7f) { illegal_1(); op_7f();                             } /* DB   DD       */
 
 OP(dd,80) { illegal_1(); op_80();                             } /* DB   DD       */
 OP(dd,81) { illegal_1(); op_81();                             } /* DB   DD       */
 OP(dd,82) { illegal_1(); op_82();                             } /* DB   DD       */
 OP(dd,83) { illegal_1(); op_83();                             } /* DB   DD       */
-OP(dd,84) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADD(HX);                                          } /* ADD  A,HX     */
-OP(dd,85) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADD(LX);                                          } /* ADD  A,LX     */
-OP(dd,86) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; ADD(RM(EA));                                 } /* ADD  A,(IX+o) */
+OP(dd,84) { libRR_log_instruction(PC-2, "ADD  A,HX", 0xdd00, 2); ADD(HX);                                          } /* ADD  A,HX     */
+OP(dd,85) { libRR_log_instruction(PC-2, "ADD  A,LX", 0xdd00, 2); ADD(LX);                                          } /* ADD  A,LX     */
+OP(dd,86) { libRR_log_instruction(PC-2, "ADD  A,(IX+o)", 0xdd00, 3); EAX; ADD(RM(EA));                                 } /* ADD  A,(IX+o) */
 OP(dd,87) { illegal_1(); op_87();                             } /* DB   DD       */
 
 OP(dd,88) { illegal_1(); op_88();                             } /* DB   DD       */
 OP(dd,89) { illegal_1(); op_89();                             } /* DB   DD       */
 OP(dd,8a) { illegal_1(); op_8a();                             } /* DB   DD       */
 OP(dd,8b) { illegal_1(); op_8b();                             } /* DB   DD       */
-OP(dd,8c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADC(HX);                                          } /* ADC  A,HX     */
-OP(dd,8d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); ADC(LX);                                          } /* ADC  A,LX     */
-OP(dd,8e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; ADC(RM(EA));                                 } /* ADC  A,(IX+o) */
+OP(dd,8c) { libRR_log_instruction(PC-2, "ADC  A,HX", 0xdd00, 2); ADC(HX);                                          } /* ADC  A,HX     */
+OP(dd,8d) { libRR_log_instruction(PC-2, "ADC  A,LX", 0xdd00, 2); ADC(LX);                                          } /* ADC  A,LX     */
+OP(dd,8e) { libRR_log_instruction(PC-2, "ADC  A,(IX+o)", 0xdd00, 3); EAX; ADC(RM(EA));                                 } /* ADC  A,(IX+o) */
 OP(dd,8f) { illegal_1(); op_8f();                             } /* DB   DD       */
 
 OP(dd,90) { illegal_1(); op_90();                             } /* DB   DD       */
 OP(dd,91) { illegal_1(); op_91();                             } /* DB   DD       */
 OP(dd,92) { illegal_1(); op_92();                             } /* DB   DD       */
 OP(dd,93) { illegal_1(); op_93();                             } /* DB   DD       */
-OP(dd,94) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); SUB(HX);                                          } /* SUB  HX       */
-OP(dd,95) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); SUB(LX);                                          } /* SUB  LX       */
-OP(dd,96) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; SUB(RM(EA));                                 } /* SUB  (IX+o)   */
+OP(dd,94) { libRR_log_instruction(PC-2, "SUB  HX", 0xdd00, 2); SUB(HX);                                          } /* SUB  HX       */
+OP(dd,95) { libRR_log_instruction(PC-2, "SUB  LX", 0xdd00, 2); SUB(LX);                                          } /* SUB  LX       */
+OP(dd,96) { libRR_log_instruction(PC-2, "SUB  (IX+o)", 0xdd00, 3); EAX; SUB(RM(EA));                                 } /* SUB  (IX+o)   */
 OP(dd,97) { illegal_1(); op_97();                             } /* DB   DD       */
 
 OP(dd,98) { illegal_1(); op_98();                             } /* DB   DD       */
 OP(dd,99) { illegal_1(); op_99();                             } /* DB   DD       */
 OP(dd,9a) { illegal_1(); op_9a();                             } /* DB   DD       */
 OP(dd,9b) { illegal_1(); op_9b();                             } /* DB   DD       */
-OP(dd,9c) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); SBC(HX);                                          } /* SBC  A,HX     */
-OP(dd,9d) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); SBC(LX);                                          } /* SBC  A,LX     */
-OP(dd,9e) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; SBC(RM(EA));                                 } /* SBC  A,(IX+o) */
+OP(dd,9c) { libRR_log_instruction(PC-2, "SBC  A,HX", 0xdd00, 2); SBC(HX);                                          } /* SBC  A,HX     */
+OP(dd,9d) { libRR_log_instruction(PC-2, "SBC  A,LX", 0xdd00, 2); SBC(LX);                                          } /* SBC  A,LX     */
+OP(dd,9e) { libRR_log_instruction(PC-2, "SBC  A,(IX+o)", 0xdd00, 3); EAX; SBC(RM(EA));                                 } /* SBC  A,(IX+o) */
 OP(dd,9f) { illegal_1(); op_9f();                             } /* DB   DD       */
 
 OP(dd,a0) { illegal_1(); op_a0();                             } /* DB   DD       */
 OP(dd,a1) { illegal_1(); op_a1();                             } /* DB   DD       */
 OP(dd,a2) { illegal_1(); op_a2();                             } /* DB   DD       */
 OP(dd,a3) { illegal_1(); op_a3();                             } /* DB   DD       */
-OP(dd,a4) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); AND(HX);                                          } /* AND  HX       */
-OP(dd,a5) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); AND(LX);                                          } /* AND  LX       */
-OP(dd,a6) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; AND(RM(EA));                                 } /* AND  (IX+o)   */
+OP(dd,a4) { libRR_log_instruction(PC-2, "AND  HX", 0xdd00, 2); AND(HX);                                          } /* AND  HX       */
+OP(dd,a5) { libRR_log_instruction(PC-2, "AND  LX", 0xdd00, 2); AND(LX);                                          } /* AND  LX       */
+OP(dd,a6) { libRR_log_instruction(PC-2, "AND  (IX+o)", 0xdd00, 3); EAX; AND(RM(EA));                                 } /* AND  (IX+o)   */
 OP(dd,a7) { illegal_1(); op_a7();                             } /* DB   DD       */
 
 OP(dd,a8) { illegal_1(); op_a8();                             } /* DB   DD       */
 OP(dd,a9) { illegal_1(); op_a9();                             } /* DB   DD       */
 OP(dd,aa) { illegal_1(); op_aa();                             } /* DB   DD       */
 OP(dd,ab) { illegal_1(); op_ab();                             } /* DB   DD       */
-OP(dd,ac) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); XOR(HX);                                          } /* XOR  HX       */
-OP(dd,ad) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); XOR(LX);                                          } /* XOR  LX       */
-OP(dd,ae) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; XOR(RM(EA));                                 } /* XOR  (IX+o)   */
+OP(dd,ac) { libRR_log_instruction(PC-2, "XOR  HX", 0xdd00, 2); XOR(HX);                                          } /* XOR  HX       */
+OP(dd,ad) { libRR_log_instruction(PC-2, "XOR  LX", 0xdd00, 2); XOR(LX);                                          } /* XOR  LX       */
+OP(dd,ae) { libRR_log_instruction(PC-2, "XOR  (IX+o)", 0xdd00, 3); EAX; XOR(RM(EA));                                 } /* XOR  (IX+o)   */
 OP(dd,af) { illegal_1(); op_af();                             } /* DB   DD       */
 
 OP(dd,b0) { illegal_1(); op_b0();                             } /* DB   DD       */
 OP(dd,b1) { illegal_1(); op_b1();                             } /* DB   DD       */
 OP(dd,b2) { illegal_1(); op_b2();                             } /* DB   DD       */
 OP(dd,b3) { illegal_1(); op_b3();                             } /* DB   DD       */
-OP(dd,b4) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); OR(HX);                                           } /* OR   HX       */
-OP(dd,b5) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); OR(LX);                                           } /* OR   LX       */
-OP(dd,b6) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; OR(RM(EA));                                  } /* OR   (IX+o)   */
+OP(dd,b4) { libRR_log_instruction(PC-2, "OR   HX", 0xdd00, 2); OR(HX);                                           } /* OR   HX       */
+OP(dd,b5) { libRR_log_instruction(PC-2, "OR   LX", 0xdd00, 2); OR(LX);                                           } /* OR   LX       */
+OP(dd,b6) { libRR_log_instruction(PC-2, "OR   (IX+o)", 0xdd00, 3); EAX; OR(RM(EA));                                  } /* OR   (IX+o)   */
 OP(dd,b7) { illegal_1(); op_b7();                             } /* DB   DD       */
 
 OP(dd,b8) { illegal_1(); op_b8();                             } /* DB   DD       */
 OP(dd,b9) { illegal_1(); op_b9();                             } /* DB   DD       */
 OP(dd,ba) { illegal_1(); op_ba();                             } /* DB   DD       */
 OP(dd,bb) { illegal_1(); op_bb();                             } /* DB   DD       */
-OP(dd,bc) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); CP(HX);                                           } /* CP   HX       */
-OP(dd,bd) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); CP(LX);                                           } /* CP   LX       */
-OP(dd,be) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EAX; CP(RM(EA));                                  } /* CP   (IX+o)   */
+OP(dd,bc) { libRR_log_instruction(PC-2, "CP   HX", 0xdd00, 2); CP(HX);                                           } /* CP   HX       */
+OP(dd,bd) { libRR_log_instruction(PC-2, "CP   LX", 0xdd00, 2); CP(LX);                                           } /* CP   LX       */
+OP(dd,be) { libRR_log_instruction(PC-2, "CP   (IX+o)", 0xdd00, 3); EAX; CP(RM(EA));                                  } /* CP   (IX+o)   */
 OP(dd,bf) { illegal_1(); op_bf();                             } /* DB   DD       */
 
 OP(dd,c0) { illegal_1(); op_c0();                             } /* DB   DD       */
@@ -2505,21 +2505,21 @@ OP(dd,d9) { illegal_1(); op_d9();                             } /* DB   DD      
 OP(dd,da) { illegal_1(); op_da();                             } /* DB   DD       */
 OP(dd,db) { illegal_1(); op_db();                             } /* DB   DD       */
 OP(dd,dc) { illegal_1(); op_dc();                             } /* DB   DD       */
-OP(dd,dd) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EXEC(dd,ROP());                                   } /* **** DD DD xx */
+OP(dd,dd) { EXEC(dd,ROP());                                   } /* **** DD DD xx */
 OP(dd,de) { illegal_1(); op_de();                             } /* DB   DD       */
 OP(dd,df) { illegal_1(); op_df();                             } /* DB   DD       */
 
 OP(dd,e0) { illegal_1(); op_e0();                             } /* DB   DD       */
-OP(dd,e1) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); POP( ix );                                        } /* POP  IX       */
+OP(dd,e1) { libRR_log_instruction(PC-2, "POP  IX", 0xdd00, 2); POP( ix );                                        } /* POP  IX       */
 OP(dd,e2) { illegal_1(); op_e2();                             } /* DB   DD       */
-OP(dd,e3) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); EXSP( ix );                                       } /* EX   (SP),IX  */
+OP(dd,e3) { libRR_log_instruction(PC-2, "EX   (SP),IX", 0xdd00, 2); EXSP( ix );                                       } /* EX   (SP),IX  */
 OP(dd,e4) { illegal_1(); op_e4();                             } /* DB   DD       */
-OP(dd,e5) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); PUSH( ix );                                       } /* PUSH IX       */
+OP(dd,e5) { libRR_log_instruction(PC-2, "PUSH IX", 0xdd00, 2); PUSH( ix );                                       } /* PUSH IX       */
 OP(dd,e6) { illegal_1(); op_e6();                             } /* DB   DD       */
 OP(dd,e7) { illegal_1(); op_e7();                             } /* DB   DD       */
 
 OP(dd,e8) { illegal_1(); op_e8();                             } /* DB   DD       */
-OP(dd,e9) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); PC = IX;                                          } /* JP   (IX)     */
+OP(dd,e9) { libRR_log_instruction(PC-2, "JP   (IX)", 0xdd00, 2); PC = IX;                                          } /* JP   (IX)     */
 OP(dd,ea) { illegal_1(); op_ea();                             } /* DB   DD       */
 OP(dd,eb) { illegal_1(); op_eb();                             } /* DB   DD       */
 OP(dd,ec) { illegal_1(); op_ec();                             } /* DB   DD       */
@@ -2537,7 +2537,7 @@ OP(dd,f6) { illegal_1(); op_f6();                             } /* DB   DD      
 OP(dd,f7) { illegal_1(); op_f7();                             } /* DB   DD       */
 
 OP(dd,f8) { illegal_1(); op_f8();                             } /* DB   DD       */
-OP(dd,f9) { libRR_log_instruction(PC-2, "TODO IX", 0xdd00, 2); SP = IX;                                          } /* LD   SP,IX    */
+OP(dd,f9) { libRR_log_instruction(PC-2, "LD   SP,IX", 0xdd00, 2); SP = IX;                                          } /* LD   SP,IX    */
 OP(dd,fa) { illegal_1(); op_fa();                             } /* DB   DD       */
 OP(dd,fb) { illegal_1(); op_fb();                             } /* DB   DD       */
 OP(dd,fc) { illegal_1(); op_fc();                             } /* DB   DD       */
