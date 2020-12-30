@@ -756,6 +756,7 @@ INLINE UINT32 ARG16(void)
  ***************************************************************/
 #define CALL() {                  \
   EA = ARG16();                   \
+  libRR_log_function_call(PC, EA, 0x00); \
   WZ = EA;                        \
   PUSH(pc);                       \
   PCD = EA;                       \
@@ -768,6 +769,7 @@ INLINE UINT32 ARG16(void)
   if (cond)                       \
   {                               \
     EA = ARG16();                 \
+    libRR_log_function_call(PC, EA, 0x00); \
     WZ = EA;                      \
     PUSH(pc);                     \
     PCD = EA;                     \
