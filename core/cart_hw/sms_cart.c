@@ -623,6 +623,7 @@ void sms_cart_reset(void)
 
 void sms_cart_switch(uint8 mode)
 {
+  printf("sms_cart_switch mode: %d \n", mode);
   /* by default, disable cartridge & BIOS ROM */
   slot.pages = 0;
 
@@ -1543,5 +1544,11 @@ static unsigned char read_mapper_korea_8k(unsigned int address)
 
 static unsigned char read_mapper_default(unsigned int address)
 {
-  return z80_readmap[address >> 10][address & 0x03FF];
+  unsigned char bytes = z80_readmap[address >> 10][address & 0x03FF];
+  int bank = get_current_bank_number_for_address(address);
+  if (bank > -1) {
+    libRR_log_rom_read(bank, address, "", 1, &bytes);
+  }
+    // printf("Default mapper read paged %d \n", address);
+  return bytes;
 }
