@@ -218,112 +218,128 @@ void libRR_log_cb_inst(unsigned pc) {
     }
 }
 
-void libRR_log_ddcb_inst(unsigned pc) {
-  int8_t opcode = cpu_readop(pc);
-  int8_t original_opcode = cpu_readop(pc-1);
+void libRR_log_ddcb_inst(unsigned pc, unsigned operand1, unsigned operand2) {
+  // All of these are 4 bytes long
+  int8_t opcode = operand2; 
+  uint32_t current_pc = pc-2;
   if (!libRR_full_function_log) {
     return;
   }
-
-  uint32_t current_pc = pc-1;
-  int16_t b2b1 = two_bytes_to_16bit_value(opcode, original_opcode);
+  int32_t b2b1 = 0xDDCB0000 + two_bytes_to_16bit_value(operand2, operand1);
   char bit_as_string[20];
   uint8_t bit = 0;
 
   switch (opcode >> 3) {
         case 0:
-              libRR_log_instruction_1int_registername(current_pc, "rlc %r%", b2b1, 2, opcode, get_src_name(opcode));
+            // 0x00 -> 0x07 are RLC
+            sprintf(bit_as_string, "rlc [ix+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 1:
-              libRR_log_instruction_1int_registername(current_pc, "rrc %r%", b2b1, 2, opcode, get_src_name(opcode));
+            // 0x08 -> 0x0F are RRC
+             sprintf(bit_as_string, "rrc [ix+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 2:
-              libRR_log_instruction_1int_registername(current_pc, "rl %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "rl [ix+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 3:
-              libRR_log_instruction_1int_registername(current_pc, "rr %r%", b2b1, 2, opcode, get_src_name(opcode));
+              sprintf(bit_as_string, "rr [ix+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 4:
-              libRR_log_instruction_1int_registername(current_pc, "sla %r%", b2b1, 2, opcode, get_src_name(opcode));
+              sprintf(bit_as_string, "sla [ix+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 5:
-            libRR_log_instruction_1int_registername(current_pc, "ddcb sra %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "sra [ix+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 6:
-            libRR_log_instruction_1int_registername(current_pc, "ddcb swap %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "sll [ix+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 7:
-            libRR_log_instruction_1int_registername(current_pc, "ddcb srl %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "srl [ix+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         default:
             bit = ((opcode >> 3) & 7);
             if ((opcode & 0xC0) == 0x40) { /* Bit */
-              sprintf(bit_as_string, "ddcb bit %d, %%r%%", bit);
+              sprintf(bit_as_string, "bit %d, [ix+%d]", bit, operand1);
             }
             else if ((opcode & 0xC0) == 0x80) { /* res */
-              sprintf(bit_as_string, "ddcb res %d, %%r%%", bit);
+              sprintf(bit_as_string, "res %d, [ix+%d]", bit, operand1);
             }
             else if ((opcode & 0xC0) == 0xC0) { /* set */
-              sprintf(bit_as_string, "ddcb set %d, %%r%%", bit);
+              sprintf(bit_as_string, "set %d, [ix+%d]", bit, operand1);
             }
             //libRR_log_bit_r(gb, original_opcode, opcode, current_pc);
-            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 2,  opcode, get_src_name(opcode));
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4,  opcode, get_src_name(opcode));
             //bit_r(gb, opcode);
             break;
     }
 }
 
-void libRR_log_fdcb_inst(unsigned pc) {
-  int8_t opcode = cpu_readop(pc);
-  int8_t original_opcode = cpu_readop(pc-1);
+void libRR_log_fdcb_inst(unsigned pc, unsigned operand1, unsigned operand2)  {
+  // All of these are 4 bytes long
+  int8_t opcode = operand2; 
+  uint32_t current_pc = pc-2;
   if (!libRR_full_function_log) {
     return;
   }
-
-  uint32_t current_pc = pc-1;
-  int16_t b2b1 = two_bytes_to_16bit_value(opcode, original_opcode);
+  int32_t b2b1 = 0xFDCB0000 + two_bytes_to_16bit_value(operand2, operand1);
   char bit_as_string[20];
   uint8_t bit = 0;
 
   switch (opcode >> 3) {
         case 0:
-              libRR_log_instruction_1int_registername(current_pc, "rlc %r%", b2b1, 2, opcode, get_src_name(opcode));
+            // 0x00 -> 0x07 are RLC
+            sprintf(bit_as_string, "rlc [iy+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 1:
-              libRR_log_instruction_1int_registername(current_pc, "rrc %r%", b2b1, 2, opcode, get_src_name(opcode));
+            // 0x08 -> 0x0F are RRC
+             sprintf(bit_as_string, "rrc [iy+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 2:
-              libRR_log_instruction_1int_registername(current_pc, "rl %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "rl [iy+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 3:
-              libRR_log_instruction_1int_registername(current_pc, "rr %r%", b2b1, 2, opcode, get_src_name(opcode));
+              sprintf(bit_as_string, "rr [iy+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 4:
-              libRR_log_instruction_1int_registername(current_pc, "sla %r%", b2b1, 2, opcode, get_src_name(opcode));
+              sprintf(bit_as_string, "sla [iy+%d],%%r%%", operand1);
+              libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 5:
-            libRR_log_instruction_1int_registername(current_pc, "sra %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "sra [iy+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 6:
-            libRR_log_instruction_1int_registername(current_pc, "swap %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "sll [iy+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         case 7:
-            libRR_log_instruction_1int_registername(current_pc, "srl %r%", b2b1, 2, opcode, get_src_name(opcode));
+            sprintf(bit_as_string, "srl [iy+%d],%%r%%", operand1);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4, opcode, get_src_name(opcode));
             break;
         default:
             bit = ((opcode >> 3) & 7);
             if ((opcode & 0xC0) == 0x40) { /* Bit */
-              sprintf(bit_as_string, "bit %d, %%r%%", bit);
+              sprintf(bit_as_string, "bit %d, [iy+%d]", bit, operand1);
             }
             else if ((opcode & 0xC0) == 0x80) { /* res */
-              sprintf(bit_as_string, "res %d, %%r%%", bit);
+              sprintf(bit_as_string, "res %d, [iy+%d]", bit, operand1);
             }
             else if ((opcode & 0xC0) == 0xC0) { /* set */
-              sprintf(bit_as_string, "set %d, %%r%%", bit);
+              sprintf(bit_as_string, "set %d, [iy+%d]", bit, operand1);
             }
-            //libRR_log_bit_r(gb, original_opcode, opcode, current_pc);
-            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 2,  opcode, get_src_name(opcode));
-            //bit_r(gb, opcode);
+            libRR_log_instruction_1int_registername(current_pc, bit_as_string, b2b1, 4,  opcode, get_src_name(opcode));
             break;
     }
 }
@@ -390,7 +406,7 @@ void libRR_log_fdcb_inst(unsigned pc) {
 #define HALT Z80.halt
 
 // libRR start
-uint32_t TEMP = 0;
+int32_t TEMP = 0;
 // libRR end
 
 #ifdef Z80_OVERCLOCK_SHIFT
@@ -894,9 +910,10 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * JP
  ***************************************************************/
-#define JP {                                     \
+#define JP(disassembly) {                                     \
   TEMP=ARG16();                                  \
-  libRR_log_long_jump(PC, TEMP, "jp");           \
+  libRR_log_instruction_1int(PC-3, disassembly , 0xc3, 3, TEMP ); \
+  libRR_log_long_jump(PC-3, TEMP, "jp");           \
   PCD = TEMP;                                    \
   WZ = PCD;                                      \
 }
@@ -904,16 +921,18 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * JP_COND
  ***************************************************************/
-#define JP_COND(cond) {                         \
+#define JP_COND(cond, disassembly) {                         \
   if (cond)                                     \
   {                                             \
     TEMP=ARG16();                               \
+    libRR_log_instruction_1int(PC-3, disassembly, 0x00, 3, TEMP ); \
     libRR_log_long_jump(PC, TEMP, "jp_cc_a16"); \
     PCD = TEMP;                                 \
     WZ = PCD;                                   \
   }                                             \
   else                                          \
   {                                             \
+    libRR_log_instruction_1int(PC-1, "z_UNTAKEN_JUMP_3", 0x00, 3, 0 ); \
     WZ = ARG16(); /* implicit do PC += 2 */     \
   }                                             \
 }
@@ -921,9 +940,10 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * JR
  ***************************************************************/
-#define JR() {                                            \
+#define JR(disassembly) {                                            \
   INT8 arg = (INT8)ARG(); /* ARG() also increments PC */  \
-  const char* label_name = libRR_log_jump_label(arg, PC-1); \
+  const char* label_name = libRR_log_jump_label(PC+arg, PC-2); \
+  libRR_log_instruction_1int_registername(PC-2, disassembly, 0x00, 2, arg, label_name ); \
   PC += arg;        /* so don't do PC += ARG() */         \
   WZ = PC;                                                \
 }
@@ -931,20 +951,24 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * JR_COND
  ***************************************************************/
-#define JR_COND(cond, opcode) {   \
+#define JR_COND(cond, opcode, disassembly) {   \
   if (cond)                       \
   {                               \
-    JR();                         \
+    JR(disassembly);                         \
     CC(ex, opcode);               \
   }                               \
-  else PC++;                      \
+  else {  \
+    libRR_log_instruction_1int(PC-1, "z_UNTAKEN_JUMP_2", 0x00, 2, 0 ); \ 
+    PC++;                      \
+  } \
 }
 
 /***************************************************************
  * CALL
  ***************************************************************/
-#define CALL() {                  \
+#define CALL(disassembly) {                  \
   EA = ARG16();                   \
+  libRR_log_instruction_1int(PC-3, disassembly, 0xc4, 3, EA ); \
   libRR_log_function_call(PC, EA, 0x00); \
   WZ = EA;                        \
   PUSH(pc);                       \
@@ -954,10 +978,11 @@ INLINE UINT32 ARG16(void)
 /***************************************************************
  * CALL_COND
  ***************************************************************/
-#define CALL_COND(cond, opcode) { \
+#define CALL_COND(cond, opcode, disassembly) { \
   if (cond)                       \
   {                               \
     EA = ARG16();                 \
+    libRR_log_instruction_1int(PC-3, disassembly, 0xd4, 3, EA ); \
     libRR_log_function_call(PC, EA, 0x00); \
     WZ = EA;                      \
     PUSH(pc);                     \
@@ -966,6 +991,7 @@ INLINE UINT32 ARG16(void)
   }                               \
   else                            \
   {                               \
+    libRR_log_instruction_1int(PC-1, "z_UNTAKEN_JUMP_3", 0xd4, 3, 0 ); \
     WZ = ARG16();  /* implicit call PC+=2;   */ \
   }                               \
 }
@@ -1037,6 +1063,7 @@ INLINE UINT32 ARG16(void)
  * RST
  ***************************************************************/
 #define RST(addr) \
+  libRR_log_rst(PC, addr); \
   PUSH( pc ); \
   PCD = addr; \
   WZ = PC;  \
@@ -2485,7 +2512,7 @@ OP(dd,c7) { illegal_1(); op_c7();                             } /* DB   DD      
 OP(dd,c8) { illegal_1(); op_c8();                             } /* DB   DD       */
 OP(dd,c9) { illegal_1(); op_c9();                             } /* DB   DD       */
 OP(dd,ca) { illegal_1(); op_ca();                             } /* DB   DD       */
-OP(dd,cb) { libRR_log_ddcb_inst(PC); EAX; EXEC(xycb,ARG());                            } /* **** DD CB xx */
+OP(dd,cb) { int pc_backup=PC; EAX; int TEMP2=ARG(); libRR_log_ddcb_inst(pc_backup, TEMP, TEMP2); EXEC(xycb,TEMP2);                            } /* **** DD CB xx */
 OP(dd,cc) { illegal_1(); op_cc();                             } /* DB   DD       */
 OP(dd,cd) { illegal_1(); op_cd();                             } /* DB   DD       */
 OP(dd,ce) { illegal_1(); op_ce();                             } /* DB   DD       */
@@ -2776,7 +2803,7 @@ OP(fd,c7) { illegal_1(); op_c7();                             } /* DB   FD      
 OP(fd,c8) { illegal_1(); op_c8();                             } /* DB   FD       */
 OP(fd,c9) { illegal_1(); op_c9();                             } /* DB   FD       */
 OP(fd,ca) { illegal_1(); op_ca();                             } /* DB   FD       */
-OP(fd,cb) { libRR_log_fdcb_inst(PC); EAY; EXEC(xycb,ARG());                            } /* **** FD CB xx */
+OP(fd,cb) { int pc_backup=PC; EAY; int TEMP2=ARG(); libRR_log_fdcb_inst(pc_backup, TEMP, TEMP2); EXEC(xycb,TEMP2);                            } /* **** FD CB xx */
 OP(fd,cc) { illegal_1(); op_cc();                             } /* DB   FD       */
 OP(fd,cd) { illegal_1(); op_cd();                             } /* DB   FD       */
 OP(fd,ce) { illegal_1(); op_ce();                             } /* DB   FD       */
@@ -3146,7 +3173,7 @@ OP(op,03) { BC++;         libRR_log_instruction(PC-1, "inc bc", 0x03, 1);       
 OP(op,04) { B = INC(B);   libRR_log_instruction(PC-1, "inc b", 0x04, 1);                               } /* INC  B           */
 OP(op,05) { B = DEC(B);   libRR_log_instruction(PC-1, "dec b", 0x05, 1);                               } /* DEC  B           */
 OP(op,06) { B = ARG();    libRR_log_instruction_1int(PC-2, "ld b, %int%", 0x06, 2, B);                      } /* LD   B,n         */
-OP(op,07) { RLCA;         libRR_log_instruction(PC-1, "rcla", 0x07, 1);                                } /* RLCA             */
+OP(op,07) { RLCA;         libRR_log_instruction(PC-1, "rlca", 0x07, 1);                                } /* RLCA             */
 
 OP(op,08) { EX_AF;        libRR_log_instruction(PC-1, "ex af, af'", 0x08, 1);                           } /* EX   AF,AF'      */
 OP(op,09) { ADD16(hl, bc); libRR_log_instruction(PC-1, "add hl, bc", 0x09, 1);                         } /* ADD  HL,BC       */
@@ -3157,7 +3184,7 @@ OP(op,0d) { C = DEC(C);   libRR_log_instruction(PC-1, "dec c", 0x0d, 1);        
 OP(op,0e) { C = ARG();    libRR_log_instruction_1int(PC-2, "ld c, %int%", 0x0e, 2, C);                      } /* LD   C,n         */
 OP(op,0f) { RRCA;         libRR_log_instruction(PC-1, "rrca", 0x0f, 1);                                } /* RRCA             */
 
-OP(op,10) { TEMP=PC; B--; JR_COND( B, 0x10 );  libRR_log_instruction_1int(TEMP-1, "djnz %int%", 0x10, 2, 0 /*TODO*/ );                      } /* DJNZ o           */
+OP(op,10) { B--; JR_COND( B, 0x10, "djnz %r%" );                     } /* DJNZ o           */
 OP(op,11) { DE = ARG16(); libRR_log_instruction_1int(PC-3, "ld de, %int%", 0x11, 3, DE);               } /* LD   DE,w        */
 OP(op,12) { WM( DE, A ); WZ_L = (DE + 1) & 0xFF;  WZ_H = A; libRR_log_instruction(PC-1, "ld (de),a", 0x12, 1);  } /* LD   (DE),A      */
 OP(op,13) { DE++;         libRR_log_instruction(PC-1, "inc de", 0x13, 1);                                  } /* INC  DE          */
@@ -3166,7 +3193,7 @@ OP(op,15) { D = DEC(D);   libRR_log_instruction(PC-1, "dec d", 0x15, 1);        
 OP(op,16) { D = ARG();    libRR_log_instruction_1int(PC-2, "ld d, %int%", 0x16, 2, D);                          } /* LD   D,n         */
 OP(op,17) { RLA;          libRR_log_instruction(PC-1, "rla", 0x17, 1);                                     } /* RLA              */
 
-OP(op,18) { TEMP=PC; JR();         libRR_log_instruction_1int(TEMP-1, "jr %int% ;todo", 0x18, 2, 0/*TODO handle jump*/);                   } /* JR   o           */
+OP(op,18) {  JR("jr %r%");                  } /* JR   o           */
 OP(op,19) { ADD16(hl, de); libRR_log_instruction(PC-1, "add hl, de", 0x19, 1);                             } /* ADD  HL,DE       */
 OP(op,1a) { A = RM( DE ); WZ=DE+1; libRR_log_instruction(PC-1, "ld a, (de)", 0x1A, 1);                     } /* LD   A,(DE)      */
 OP(op,1b) { DE--;         libRR_log_instruction(PC-1, "dec de", 0x1b, 1);                                  } /* DEC  DE          */
@@ -3175,7 +3202,7 @@ OP(op,1d) { E = DEC(E);   libRR_log_instruction(PC-1, "dec e", 0x1d, 1);        
 OP(op,1e) { E = ARG();    libRR_log_instruction_1int(PC-2, "ld e, %int%", 0x1e, 2, E);                          } /* LD   E,n         */
 OP(op,1f) { RRA;          libRR_log_instruction(PC-1, "rra", 0x1f, 1);                                     } /* RRA              */
 
-OP(op,20) { TEMP=PC; JR_COND( !(F & ZF), 0x20 ); libRR_log_instruction_1int(TEMP-1, "jr nz, %int% ;todo", 0x20, 2, 0/*TODO handle jump*/); } /* JR   NZ,o        */
+OP(op,20) { JR_COND( !(F & ZF), 0x20, "jr nz, %r%" ); } /* JR   NZ,o        */
 OP(op,21) { HL = ARG16();  libRR_log_instruction_1int(PC-3, "ld hl, %int%", 0x21, 3, HL);                  } /* LD   HL,w        */
 OP(op,22) { EA = ARG16(); WM16( EA, &Z80.hl ); WZ = EA+1; libRR_log_instruction_1int(PC-3, "ld (%int%), hl", 0x22, 3, EA);  } /* LD   (w),HL      */
 OP(op,23) { HL++;         libRR_log_instruction(PC-1, "inc hl", 0x23, 1);                                  } /* INC  HL          */
@@ -3184,7 +3211,7 @@ OP(op,25) { H = DEC(H);   libRR_log_instruction(PC-1, "dec h", 0x25, 1);        
 OP(op,26) { H = ARG();    libRR_log_instruction_1int(PC-2, "ld h, %int%", 0x26, 2, H);                          } /* LD   H,n         */
 OP(op,27) { DAA;          libRR_log_instruction(PC-1, "daa", 0x27, 1);                                     } /* DAA              */
 
-OP(op,28) { TEMP=PC; JR_COND( F & ZF, 0x28 ); libRR_log_instruction_1int(TEMP-1, "jr z, %int%", 0x28, 2, 0 /*TODO*/ );               } /* JR   Z,o         */
+OP(op,28) { JR_COND( F & ZF, 0x28, "jr z, %r%" );               } /* JR   Z,o         */
 OP(op,29) { ADD16(hl, hl); libRR_log_instruction(PC-1, "add hl, hl", 0x29, 1);                                 } /* ADD  HL,HL       */
 OP(op,2a) { EA = ARG16(); RM16( EA, &Z80.hl ); WZ = EA+1; libRR_log_instruction_1int(PC-3, "ld hl, (%int%)", 0x2a, 3, EA); } /* LD   HL,(w)      */
 OP(op,2b) { HL--;         libRR_log_instruction(PC-1, "dec hl", 0x2b, 1);                                  } /* DEC  HL          */
@@ -3193,7 +3220,7 @@ OP(op,2d) { L = DEC(L);   libRR_log_instruction(PC-1, "dec l", 0x2d, 1);        
 OP(op,2e) { L = ARG();    libRR_log_instruction_1int(PC-2, "ld l, %int%", 0x2e, 2, L);                          } /* LD   L,n         */
 OP(op,2f) { A ^= 0xff; F = (F&(SF|ZF|PF|CF))|HF|NF|(A&(YF|XF)); libRR_log_instruction(PC-1, "cpl", 0x2f, 1); } /* CPL              */
 
-OP(op,30) { TEMP=PC; JR_COND( !(F & CF), 0x30 ); libRR_log_instruction_1int(TEMP-1, "jr nc, %int%", 0x30, 2, 0 /*TODO*/ ); } /* JR   NC,o        */
+OP(op,30) { JR_COND( !(F & CF), 0x30, "jr nc, %r%" ); } /* JR   NC,o        */
 OP(op,31) { SP = ARG16(); libRR_log_instruction_1int(PC-3, "ld sp, %int%", 0x31, 3, SP);                        } /* LD   SP,w        */
 OP(op,32) { EA = ARG16(); WM( EA, A ); WZ_L=(EA+1)&0xFF;WZ_H=A; libRR_log_instruction_1int(PC-3, "ld (%int%), a", 0x32, 3, EA); } /* LD   (w),A       */
 OP(op,33) { SP++;          libRR_log_instruction(PC-1, "inc sp", 0x33, 1);                                 } /* INC  SP          */
@@ -3202,7 +3229,7 @@ OP(op,35) { WM( HL, DEC(RM(HL)) );  libRR_log_instruction(PC-1, "dec (hl)", 0x35
 OP(op,36) { TEMP=ARG(); WM( HL, TEMP );    libRR_log_instruction_1int(PC-2, "ld (hl), %int%", 0x36, 2, TEMP);             } /* LD   (HL),n      */
 OP(op,37) { F = (F & (SF|ZF|YF|XF|PF)) | CF | (A & (YF|XF)); libRR_log_instruction(PC-1, "scf", 0x37, 1); } /* SCF              */
 
-OP(op,38) { TEMP=PC; JR_COND( F & CF, 0x38 ); libRR_log_instruction_1int(TEMP-1, "jr c, %int%", 0x38, 2, 0 /*TODO*/ );  } /* JR   C,o         */
+OP(op,38) { JR_COND( F & CF, 0x38, "jr c, %r%" );  } /* JR   C,o         */
 OP(op,39) { ADD16(hl, sp);  libRR_log_instruction(PC-1, "add hl,sp", 0x39, 1);                             } /* ADD  HL,SP       */
 OP(op,3a) { EA = ARG16(); A = RM( EA ); WZ = EA+1; libRR_log_instruction_1int(PC-3, "ld a, (%int%)", 0x3a, 3, EA); } /* LD   A,(w)       */
 OP(op,3b) { SP--;        libRR_log_instruction(PC-1, "dec sp", 0x3b, 1);                                   } /* DEC  SP          */
@@ -3357,74 +3384,74 @@ OP(op,bf) { CP(A);       libRR_log_instruction(PC-1, "cp a", 0xbf, 1);          
 
 OP(op,c0) {             libRR_log_instruction(PC-1, "ret nz", 0xc0, 1);                         RET_COND( !(F & ZF), 0xc0 ); } /* RET  NZ          */
 OP(op,c1) {             libRR_log_instruction(PC-1, "pop bc", 0xc1, 1);                         POP( bc );                  } /* POP  BC          */
-OP(op,c2) {             libRR_log_instruction_1int(PC-1, "jp nz, %int%", 0xc2, 3, 0 /*TODO*/ ); JP_COND( !(F & ZF) );       } /* JP   NZ,a        */
-OP(op,c3) {             libRR_log_instruction_1int(PC-1, "jp %int%", 0xc3, 3, 0 /*TODO*/ );     JP;                         } /* JP   a           */
-OP(op,c4) {             libRR_log_instruction_1int(PC-1, "call nz, %int%", 0xc4, 3, 0 /*TODO*/ ); CALL_COND( !(F & ZF), 0xc4 ); } /* CALL NZ,a        */
+OP(op,c2) {             JP_COND( !(F & ZF) , "jp nz, %int%");       } /* JP   NZ,a        */
+OP(op,c3) {             JP("jp %int%");                         } /* JP   a           */
+OP(op,c4) {             CALL_COND( !(F & ZF), 0xc4, "call nz, %int%" ); } /* CALL NZ,a        */
 OP(op,c5) {             libRR_log_instruction(PC-1, "push bc", 0xc5, 1);                        PUSH( bc );                 } /* PUSH BC          */
-OP(op,c6) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "and a, %int%", 0xc6, 2, TEMP );       ADD(TEMP);                  } /* ADD  A,n         */
+OP(op,c6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "and a, %int%", 0xc6, 2, TEMP );       ADD(TEMP);                  } /* ADD  A,n         */
 OP(op,c7) {             libRR_log_instruction(PC-1, "rst $00", 0xc7, 1);                        RST(0x00);                  } /* RST  0           */
 
 OP(op,c8) {             libRR_log_instruction(PC-1, "ret z", 0xc8, 1);                          RET_COND( F & ZF, 0xc8 );   } /* RET  Z           */
 OP(op,c9) {             libRR_log_instruction(PC-1, "ret", 0xc9, 1);                            POP( pc ); WZ=PCD;  /*doesn't call ret possible bug?*/ } /* RET              */
-OP(op,ca) {             libRR_log_instruction_1int(PC-1, "jp z, %int%", 0xca, 3, 0 /*TODO*/ );  JP_COND( F & ZF );          } /* JP   Z,a         */
+OP(op,ca) {             JP_COND( F & ZF , "jp z, %int%" );          } /* JP   Z,a         */
 OP(op,cb) { libRR_log_cb_inst(PC);  R++; EXEC(cb,ROP());                                                                                            } /* **** CB xx       */
-OP(op,cc) {             libRR_log_instruction_1int(PC-1, "call z, %int%", 0xcc, 3, 0 /*TODO*/ ); CALL_COND( F & ZF, 0xcc ); } /* CALL Z,a         */
-OP(op,cd) {             libRR_log_instruction_1int(PC-1, "call %int%", 0xcd, 3, 0 /*TODO*/ );   CALL();                     } /* CALL a           */
-OP(op,ce) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "adc a, %int%", 0xce, 2, TEMP );       ADC(TEMP);                  } /* ADC  A,n         */
+OP(op,cc) {             CALL_COND( F & ZF, 0xcc, "call z, %int%" ); } /* CALL Z,a         */
+OP(op,cd) {             CALL("call %int%");                     } /* CALL a           */
+OP(op,ce) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "adc a, %int%", 0xce, 2, TEMP );       ADC(TEMP);                  } /* ADC  A,n         */
 OP(op,cf) {             libRR_log_instruction(PC-1, "rst $08", 0xcf, 1);                        RST(0x08);                  } /* RST  1           */
 
 OP(op,d0) {             libRR_log_instruction(PC-1, "ret nc", 0xd0, 1);                         RET_COND( !(F & CF), 0xd0 ); } /* RET  NC          */
 OP(op,d1) {             libRR_log_instruction(PC-1, "pop de", 0xd1, 1);                         POP( de );                  } /* POP  DE          */
-OP(op,d2) {             libRR_log_instruction_1int(PC-1, "jp nc, %int%", 0xd2, 3, 0 /*TODO*/ ); JP_COND( !(F & CF) );       } /* JP   NC,a        */
+OP(op,d2) {             JP_COND( !(F & CF), "jp nc, %int%" );       } /* JP   NC,a        */
 OP(op,d3) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "out (%int%), a", 0xd3, 2, TEMP );     unsigned n = TEMP | (A << 8); OUT( n, A ); WZ_L = ((n & 0xff) + 1) & 0xff;  WZ_H = A;  } /* OUT  (n),A       */
-OP(op,d4) {             libRR_log_instruction_1int(PC-1, "call nc, %int%", 0xd4, 3, 0 /*TODO*/ ); CALL_COND( !(F & CF), 0xd4 );  } /* CALL NC,a        */
+OP(op,d4) {             CALL_COND( !(F & CF), 0xd4, "call nc, %int%" );  } /* CALL NC,a        */
 OP(op,d5) {             libRR_log_instruction(PC-1, "push de", 0xd5, 1);                        PUSH( de );                 } /* PUSH DE          */
-OP(op,d6) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "sub %int%", 0xd6, 2, TEMP );           SUB(TEMP);                 } /* SUB  n           */
+OP(op,d6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "sub %int%", 0xd6, 2, TEMP );           SUB(TEMP);                 } /* SUB  n           */
 OP(op,d7) {             libRR_log_instruction(PC-1, "rst $10", 0xd7, 1);                         RST(0x10);                 } /* RST  2           */
 
 OP(op,d8) {             libRR_log_instruction(PC-1, "ret c", 0xd8, 1);                           RET_COND( F & CF, 0xd8 );  } /* RET  C           */
 OP(op,d9) {             libRR_log_instruction(PC-1, "exx", 0xd9, 1);                             EXX;                       } /* EXX              */
-OP(op,da) {             libRR_log_instruction_1int(PC-1, "jp c, %int%", 0xda, 3, 0 /*TODO*/ );   JP_COND( F & CF );         } /* JP   C,a         */
-OP(op,db) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "in a, (%int%)", 0xdb, 2, TEMP ); unsigned n = TEMP | (A << 8); A = IN( n ); WZ = n + 1;  } /* IN   A,(n)       */
-OP(op,dc) {             libRR_log_instruction_1int(PC-1, "call c, %int%", 0xdc, 3, 0 /*TODO*/ ); CALL_COND( F & CF, 0xdc ); } /* CALL C,a         */
+OP(op,da) {             JP_COND( F & CF, "jp c, %int%" );         } /* JP   C,a         */
+OP(op,db) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "in a, (%int%)", 0xdb, 2, TEMP ); unsigned n = TEMP | (A << 8); A = IN( n ); WZ = n + 1;  } /* IN   A,(n)       */
+OP(op,dc) {             CALL_COND( F & CF, 0xdc, "call c, %int%" ); } /* CALL C,a         */
 OP(op,dd) { R++; EXEC(dd,ROP());                                                                                            } /* **** DD xx       */
-OP(op,de) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "sbc a, %int%", 0xde, 2, TEMP );        SBC(TEMP);                 } /* SBC  A,n         */
+OP(op,de) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "sbc a, %int%", 0xde, 2, TEMP );        SBC(TEMP);                 } /* SBC  A,n         */
 OP(op,df) {             libRR_log_instruction(PC-1, "rst $18", 0xdf, 1);                         RST(0x18);                 } /* RST  3           */
 
 OP(op,e0) {             libRR_log_instruction(PC-1, "ret po", 0xe0, 1);                          RET_COND( !(F & PF), 0xe0 ); } /* RET  PO          */
 OP(op,e1) {             libRR_log_instruction(PC-1, "pop hl", 0xe1, 1);                          POP( hl );                 } /* POP  HL          */
-OP(op,e2) {             libRR_log_instruction_1int(PC-1, "jp po, %int%", 0xe2, 3, 0 /*TODO*/ );  JP_COND( !(F & PF) );      } /* JP   PO,a        */
+OP(op,e2) {             JP_COND( !(F & PF), "jp po, %int%" );      } /* JP   PO,a        */
 OP(op,e3) {             libRR_log_instruction(PC-1, "ex (sp), hl", 0xe3, 1);                     EXSP( hl );                } /* EX   HL,(SP)     */
-OP(op,e4) {             libRR_log_instruction_1int(PC-1, "call po, %int%", 0xe4, 3, 0 /*TODO*/ ); CALL_COND( !(F & PF), 0xe4 ); } /* CALL PO,a        */
+OP(op,e4) {             CALL_COND( !(F & PF), 0xe4, "call po, %int%" ); } /* CALL PO,a        */
 OP(op,e5) {             libRR_log_instruction(PC-1, "push hl", 0xe5, 1);                         PUSH( hl );                } /* PUSH HL          */
-OP(op,e6) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "and %int%", 0xe6, 2, TEMP );           AND(TEMP);                 } /* AND  n           */
+OP(op,e6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "and %int%", 0xe6, 2, TEMP );           AND(TEMP);                 } /* AND  n           */
 OP(op,e7) {             libRR_log_instruction(PC-1, "rst $20", 0xe7, 1);                         RST(0x20);                 } /* RST  4           */
 
 OP(op,e8) {             libRR_log_instruction(PC-1, "ret pe", 0xe8, 1);                          RET_COND( F & PF, 0xe8 );  } /* RET  PE          */
 OP(op,e9) {             libRR_log_instruction(PC-1, "jp (hl)", 0xe9, 1);                         PC = HL;                   } /* JP   (HL)        */
-OP(op,ea) {             libRR_log_instruction_1int(PC-1, "jp pe, %int%", 0xea, 3, 0 /*TODO*/ );  JP_COND( F & PF );         } /* JP   PE,a        */
+OP(op,ea) {             JP_COND( F & PF, "jp pe, %int%" );         } /* JP   PE,a        */
 OP(op,eb) {             libRR_log_instruction(PC-1, "ex de, hl", 0xeb, 1);                       EX_DE_HL;                  } /* EX   DE,HL       */
-OP(op,ec) {             libRR_log_instruction_1int(PC-1, "call pe, %int%", 0xec, 3, 0 /*TODO*/ ); CALL_COND( F & PF, 0xec ); } /* CALL PE,a        */
+OP(op,ec) {             CALL_COND( F & PF, 0xec, "call pe, %int%" ); } /* CALL PE,a        */
 OP(op,ed) { R++; EXEC(ed,ROP());                                                                                            } /* **** ED xx       */
-OP(op,ee) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "xor %int%", 0xee, 2, TEMP );           XOR(TEMP);                 } /* XOR  n           */
+OP(op,ee) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "xor %int%", 0xee, 2, TEMP );           XOR(TEMP);                 } /* XOR  n           */
 OP(op,ef) {             libRR_log_instruction(PC-1, "rst $28", 0xef, 1);                         RST(0x28);                 } /* RST  5           */
 
 OP(op,f0) {             libRR_log_instruction(PC-1, "ret p", 0xf0, 1);                           RET_COND( !(F & SF), 0xf0 ); } /* RET  P           */
 OP(op,f1) {             libRR_log_instruction(PC-1, "pop af", 0xf1, 1);                          POP( af );                 } /* POP  AF          */
-OP(op,f2) {             libRR_log_instruction_1int(PC-1, "jp p, %int%", 0xf2, 3, 0 /*TODO*/ );   JP_COND( !(F & SF) );      } /* JP   P,a         */
+OP(op,f2) {             JP_COND( !(F & SF), "jp p, %int%" );      } /* JP   P,a         */
 OP(op,f3) {             libRR_log_instruction(PC-1, "di", 0xf3, 1);                              IFF1 = IFF2 = 0;           } /* DI               */
-OP(op,f4) {             libRR_log_instruction_1int(PC-1, "call p, %int%", 0xf4, 3, 0 /*TODO*/ ); CALL_COND( !(F & SF), 0xf4 ); } /* CALL P,a         */
+OP(op,f4) {             CALL_COND( !(F & SF), 0xf4, "call p, %int%" ); } /* CALL P,a         */
 OP(op,f5) {             libRR_log_instruction(PC-1, "push af", 0xf5, 1);                         PUSH( af );                } /* PUSH AF          */
-OP(op,f6) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "or %int%", 0xf6, 2, TEMP );            OR(TEMP);                  } /* OR   n           */
+OP(op,f6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "or %int%", 0xf6, 2, TEMP );            OR(TEMP);                  } /* OR   n           */
 OP(op,f7) {             libRR_log_instruction(PC-1, "rst $30", 0xf7, 1);                         RST(0x30);                 } /* RST  6           */
 
 OP(op,f8) {             libRR_log_instruction(PC-1, "ret m", 0xf8, 1);                           RET_COND( F & SF, 0xf8 );  } /* RET  M           */
 OP(op,f9) {             libRR_log_instruction(PC-1, "ld sp, hl", 0xf9, 1);                       SP = HL;                   } /* LD   SP,HL       */
-OP(op,fa) {             libRR_log_instruction_1int(PC-1, "jp m, %int%", 0xfa, 3, 0 /*TODO*/ );   JP_COND(F & SF);           } /* JP   M,a         */
+OP(op,fa) {             JP_COND(F & SF, "jp m, %int%");           } /* JP   M,a         */
 OP(op,fb) {             libRR_log_instruction(PC-1, "ei", 0xfb, 1);                              EI;                        } /* EI               */
-OP(op,fc) {             libRR_log_instruction_1int(PC-1, "call m, %int%", 0xfc, 3, 0 /*TODO*/ ); CALL_COND( F & SF, 0xfc ); } /* CALL M,a         */
+OP(op,fc) {             CALL_COND( F & SF, 0xfc, "call m, %int%" ); } /* CALL M,a         */
 OP(op,fd) { R++; EXEC(fd,ROP());                                                                             } /* **** FD xx       */
-OP(op,fe) { TEMP=ARG(); libRR_log_instruction_1int(PC-1, "cp %int%", 0xfe, 2, TEMP);             CP(TEMP);                  } /* CP   n           */
+OP(op,fe) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "cp %int%", 0xfe, 2, TEMP);             CP(TEMP);                  } /* CP   n           */
 OP(op,ff) {             libRR_log_instruction(PC-1, "rst $38", 0xff, 1); RST(0x38);                                         } /* RST  7           */
 
 
@@ -3438,9 +3465,11 @@ static void take_interrupt(void)
 
   LOG(("Z80 #%d single int. irq_vector $%02x\n", cpu_getactivecpu(), irq_vector));
 
+
   /* Interrupt mode 1. RST 38h */
   if( IM == 1 )
   {
+    // printf("take_interrupt IM: %d \n", IM);
     LOG(("Z80 #%d IM1 $0038\n",cpu_getactivecpu() ));
     PUSH( pc );
     PCD = 0x0038;
@@ -3449,6 +3478,7 @@ static void take_interrupt(void)
   }
   else
   {
+    printf("take_interrupt Not 1 IM: %d \n", IM);
     /* call back the cpu interface to retrieve the vector */
     int irq_vector = (*Z80.irq_callback)(0);
 
