@@ -3428,7 +3428,7 @@ OP(op,e6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "and %int%", 0xe6, 2, T
 OP(op,e7) {             libRR_log_instruction(PC-1, "rst $20", 0xe7, 1);                         RST(0x20);                 } /* RST  4           */
 
 OP(op,e8) {             libRR_log_instruction(PC-1, "ret pe", 0xe8, 1);                          RET_COND( F & PF, 0xe8 );  } /* RET  PE          */
-OP(op,e9) {             libRR_log_instruction(PC-1, "jp (hl)", 0xe9, 1);                         PC = HL;                   } /* JP   (HL)        */
+OP(op,e9) {             libRR_log_instruction(PC-1, "jp (hl)", 0xe9, 1); libRR_log_long_jump(PC-1, HL, "jp(hl)");                       PC = HL;                   } /* JP   (HL)        */
 OP(op,ea) {             JP_COND( F & PF, "jp pe, %int%" );         } /* JP   PE,a        */
 OP(op,eb) {             libRR_log_instruction(PC-1, "ex de, hl", 0xeb, 1);                       EX_DE_HL;                  } /* EX   DE,HL       */
 OP(op,ec) {             CALL_COND( F & PF, 0xec, "call pe, %int%" ); } /* CALL PE,a        */
