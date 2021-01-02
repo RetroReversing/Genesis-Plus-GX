@@ -3388,7 +3388,7 @@ OP(op,c2) {             JP_COND( !(F & ZF) , "jp nz, %int%");       } /* JP   NZ
 OP(op,c3) {             JP("jp %int%");                         } /* JP   a           */
 OP(op,c4) {             CALL_COND( !(F & ZF), 0xc4, "call nz, %int%" ); } /* CALL NZ,a        */
 OP(op,c5) {             libRR_log_instruction(PC-1, "push bc", 0xc5, 1);                        PUSH( bc );                 } /* PUSH BC          */
-OP(op,c6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "and a, %int%", 0xc6, 2, TEMP );       ADD(TEMP);                  } /* ADD  A,n         */
+OP(op,c6) { TEMP=ARG(); libRR_log_instruction_1int(PC-2, "add a, %int%", 0xc6, 2, TEMP );       ADD(TEMP);                  } /* ADD  A,n         */
 OP(op,c7) {             libRR_log_instruction(PC-1, "rst $00", 0xc7, 1);                        RST(0x00);                  } /* RST  0           */
 
 OP(op,c8) {             libRR_log_instruction(PC-1, "ret z", 0xc8, 1);                          RET_COND( F & ZF, 0xc8 );   } /* RET  Z           */

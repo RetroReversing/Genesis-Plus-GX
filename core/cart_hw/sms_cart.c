@@ -550,6 +550,7 @@ void sms_cart_init(void)
   }
 }
 
+extern int libRR_total_banks;
 void sms_cart_reset(void)
 {
   /* reset BIOS ROM paging (SEGA mapper by default) */
@@ -619,6 +620,7 @@ void sms_cart_reset(void)
     /* BIOS ROM is mapped to $0000-$03FF */
     z80_readmap[0] = cart.rom + 0x400000;
   }
+  libRR_total_banks = slot.pages;
 }
 
 void sms_cart_switch(uint8 mode)
@@ -1126,11 +1128,16 @@ static void mapper_8k_w(int offset, unsigned char data)
   CHEATS_UPDATE();
 #endif
 }
-    
+
+extern uint16_t libRR_current_bank_slot_0;
+extern uint16_t libRR_current_bank_slot_1;
+extern uint16_t libRR_current_bank_slot_2;
+
 static void mapper_16k_w(int offset, unsigned char data)
 {
+  // The memory mapping registers are address 0xFFFC-0xFFFF but the offset has been & 3 before coming into this function
+  // this makes offset equal to the slot number
   int i;
-
   /* cartridge ROM page (16KB) */
   uint8 page = data % slot.pages;
 
@@ -1143,7 +1150,7 @@ static void mapper_16k_w(int offset, unsigned char data)
   /* save frame control register data */
   slot.fcr[offset] = data;
 
-  switch (offset)
+  switch (offset) // each case is a slot apart from 0
   {
     case 0: /* control register (SEGA mapper only) */
     {
@@ -1205,6 +1212,7 @@ static void mapper_16k_w(int offset, unsigned char data)
       {
         z80_readmap[i] = &slot.rom[(page << 14) | ((i & 0x0F) << 10)];
       }
+      libRR_current_bank_slot_0 = page;
       break;
     }
 
@@ -1239,6 +1247,7 @@ static void mapper_16k_w(int offset, unsigned char data)
           }
         }
       }
+      libRR_current_bank_slot_1 = page;
       break;
     }
 
@@ -1261,6 +1270,7 @@ static void mapper_16k_w(int offset, unsigned char data)
       {
         z80_readmap[i] = &slot.rom[(page << 14) | ((i & 0x0F) << 10)];
       }
+      libRR_current_bank_slot_2 = page;
       break;
     }
   }
@@ -1308,6 +1318,7 @@ static void write_mapper_sega(unsigned int address, unsigned char data)
 {
   if (address >= 0xFFFC)
   {
+    // The memory mapping registers are address 0xFFFC-0xFFFF
     mapper_16k_w(address & 3, data);
   }
 
@@ -1538,7 +1549,6 @@ static unsigned char read_mapper_korea_8k(unsigned int address)
             ((data << 1) & 0x10) | ((data << 3) & 0x20) |
             ((data << 5) & 0x40) | ((data << 7) & 0x80));
   }
-
   return data;
 }
 
@@ -1549,6 +1559,5 @@ static unsigned char read_mapper_default(unsigned int address)
   if (bank > -1) {
     libRR_log_rom_read(bank, address, "", 1, &bytes);
   }
-    // printf("Default mapper read paged %d \n", address);
   return bytes;
 }
